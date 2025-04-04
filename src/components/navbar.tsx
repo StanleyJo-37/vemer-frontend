@@ -1,9 +1,8 @@
 "use client";
 
-import { icons } from "lucide-react";
 import LucideIcon from "./lucide-icon";
 import Link from "next/link";
-import { NavCompType } from "@/types";
+import { NavCompType } from "@/types/NavTypes";
 import { cn } from "@/lib/utils";
 import navs from "@/constants/main-nav";
 import { usePathname } from "next/navigation";

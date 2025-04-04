@@ -1,3 +1,5 @@
+"use client";
+
 import { icons, LucideProps } from "lucide-react";
 
 export default function LucideIcon({ icon, ...props}: { icon: keyof typeof icons } & LucideProps) {
