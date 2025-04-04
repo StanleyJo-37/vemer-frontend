@@ -1,4 +1,4 @@
-import { NavCompType } from "@/types";
+import { NavCompType } from "@/types/NavTypes";
 
 const navs: NavCompType[] = [
     {
@@ -23,7 +23,7 @@ const navs: NavCompType[] = [
     },
     {
         label: 'Sign Up',
-        href: '/(auth)/sign-up/',
+        href: '/auth/register/',
         icon: 'UserPlus',
         highlight: true,
     },
