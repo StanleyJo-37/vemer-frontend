@@ -1,8 +1,16 @@
 import Axios from "axios";
 import API_URL from ".";
 
-const axios = Axios.create({
-    baseURL: API_URL.local,
+const PublicAPI = Axios.create({
+    baseURL: API_URL.local + '/public',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+    }
+});
+
+const AuthenticatedAPI = Axios.create({
+    baseURL: API_URL.local + '/auth',
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
@@ -10,7 +18,7 @@ const axios = Axios.create({
     }
 });
 
-axios.interceptors.response.use(
+PublicAPI.interceptors.response.use(
     async (response) => {
         return response;
     },
@@ -19,4 +27,18 @@ axios.interceptors.response.use(
     }
 );
 
-export default axios;
+AuthenticatedAPI.interceptors.response.use(
+    async (response) => {
+        return response;
+    },
+    async (error) => {
+        throw error;
+    }
+);
+
+const API = {
+    AuthenticatedAPI,
+    PublicAPI,
+}
+
+export default API;
