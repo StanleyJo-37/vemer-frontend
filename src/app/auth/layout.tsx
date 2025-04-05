@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import React from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,7 +13,6 @@ export async function generateMetadata(): Promise<Metadata> {
         title: "Register",
         description: "Buat akun baru untuk menggunakan layanan Vemer.",
         keywords: "Vemer, register vemer, buat akun vemer",
-        viewport: "width=device-width, initial-scale=1.0",
         robots: "index, follow",
         other: {
             ["og:site_name"]: "Vemer",
@@ -25,14 +24,23 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
+export async function generateViewport(): Promise<Viewport> {
+    return {
+        initialScale: 1.0,
+        width: 'device-width',
+    };
+};
+
 export default function Layout({
     children,
 }: {
     children: React.ReactNode,
 }) {
     return (
-        <div>
-            {children}
+        <div className="w-screen h-screen flex justify-center items-center">
+            <div className="w-auto h-auto bg-yellow-100 p-4">
+                {children}
+            </div>
         </div>
     );
 }
