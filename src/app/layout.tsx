@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AuthProvider from "@/providers/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,7 +27,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Potensimu Untuk Bersama",
       description: "Dapatkan informasi event-event menarik dan ikuti berbagai event guna diri sendiri dan orang lain.",
       keywords: "Vemer, register vemer, buat akun vemer",
-      viewport: "width=device-width, initial-scale=1.0",
       robots: "index, follow",
       other: {
           ["og:site_name"]: "Vemer",
@@ -37,6 +37,13 @@ export async function generateMetadata(): Promise<Metadata> {
       }
   };
 }
+
+export async function generateViewport(): Promise<Viewport> {
+  return {
+    initialScale: 1.0,
+    width: 'device-width',
+  };
+};
 
 export default function RootLayout({
   children,
@@ -50,6 +57,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           {children}
+          <Toaster position="bottom-right" />
         </AuthProvider>
       </body>
     </html>
