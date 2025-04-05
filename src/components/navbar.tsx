@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import useTheme from "@/hooks/useTheme";
 import { Switch } from "./ui/switch";
 import { useEffect, useState } from "react";
+import ThemeToggler from "./theme-toggler";
 
 function NavComp({
     label,
@@ -36,7 +37,6 @@ function NavComp({
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { theme, toggleTheme } = useTheme();
 
     const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
@@ -61,10 +61,7 @@ export default function Navbar() {
             <div className="flex flex-row w-fit justify-center items-center space-x-24">
                 {navs.map(nav => <NavComp key={nav.href} {...nav} active={pathname === nav.href} />)}
             </div>
-            <Switch
-                checked={theme === "light"}
-                onCheckedChange={toggleTheme}
-            />
+            <ThemeToggler />
         </nav>
     );
 }
