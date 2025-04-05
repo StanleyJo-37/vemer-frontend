@@ -36,9 +36,8 @@ function NavComp({
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { theme } = useTheme();
+    const { theme, toggleTheme } = useTheme();
 
-    const [mode, setMode] = useState<"light" | "dark">(theme);
     const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
     useEffect(() => {
@@ -53,20 +52,18 @@ export default function Navbar() {
         <nav
             className={cn(
                 "md:flex md:flex-row md:justify-between md:items-center md:w-screen md:px-12 md:py-8 sticky top-0",
-                isScrolled ? "bg-white/95 backdrop-blur-sm shadow-sm py-2" : "bg-white py-4",
+                isScrolled ? "bg-background/95 backdrop-blur-sm shadow-sm py-2" : "bg-background py-4",
             )}
         >
-            <div>LOGO</div>
+            <Link href="/">
+                LOGO
+            </Link>
             <div className="flex flex-row w-fit justify-center items-center space-x-24">
                 {navs.map(nav => <NavComp key={nav.href} {...nav} active={pathname === nav.href} />)}
             </div>
             <Switch
-                checked={mode === "light"}
-                onCheckedChange={() => {
-                    const newTheme = theme === "light" ? "dark" : "light";
-                    localStorage.setItem("theme", newTheme);
-                    setMode(newTheme);
-                }}
+                checked={theme === "light"}
+                onCheckedChange={toggleTheme}
             />
         </nav>
     );
