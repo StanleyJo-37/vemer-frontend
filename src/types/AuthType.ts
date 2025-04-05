@@ -8,5 +8,8 @@ export interface User {
 export interface AuthContextType {
     user?: User;
     setUser?: (user: User) => void;
-    token?: string;
+    loading?: boolean;
+    isAuthenticated?: boolean;
 };
+
+export type SocialiteProvider = "";
