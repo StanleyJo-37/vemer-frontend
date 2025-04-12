@@ -12,4 +12,4 @@ export interface AuthContextType {
     isAuthenticated?: boolean;
 };
 
-export type SocialiteProvider = "";
+export type SocialiteProvider = "google" | "linkedin-openid";
