@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LucideIcon from "@/components/lucide-icon";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +13,10 @@ import AuthAPI from "@/api/AuthAPI";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SocialiteProvider } from "@/types/AuthType";
+import AnimatedButton from "@/components/animated-button";
+import { icons } from "lucide-react";
+import { AxiosError } from "axios";
 
 const RegisterFormSchema = z.object({
     'email': z.string().email().min(1, {message: "Email wajib diisi."}),
@@ -21,10 +25,24 @@ const RegisterFormSchema = z.object({
     'toc-accept': z.boolean().refine(val => val, { message: "Anda harus menyetujui syarat penggunaan Vemer."}),
 });
 
+const sso: { label: string; provider: SocialiteProvider, icon: keyof typeof icons }[] = [
+    {
+        label: 'Google',
+        provider: 'google',
+        icon: 'Airplay',
+    },
+    {
+        label: 'LinkedIn',
+        provider: 'linkedin-openid',
+        icon: 'Linkedin',
+    }
+]
+
 export default function RegisterForm() {
     const [isPasswordShown, setIsPasswordShown] = useState<boolean>(false);
     const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
     const [isTocAcceptDialogOpen, setIsTocAcceptDialogOpen] = useState<boolean>(false);
+    const [ssoProvider, setSsoProvider] = useState<SocialiteProvider>();
 
     const router = useRouter();
     
@@ -37,6 +55,25 @@ export default function RegisterForm() {
             'toc-accept': false,
         },
     });
+
+    useEffect(() => {
+        if (!ssoProvider) return;
+    
+        const ssoLogin = async () => {
+            try {
+                const resp = await AuthAPI.loginSSO(ssoProvider, '', '');
+                
+            } catch (err) {
+                if (err instanceof AxiosError) {
+                    
+                }
+            } finally {
+                setSsoProvider(undefined);
+            }
+        };
+    
+        ssoLogin();
+    }, [ssoProvider]);    
 
     const onSubmit = async(data: z.infer<typeof RegisterFormSchema>) => {
         setIsSubmitLoading(true);
@@ -60,10 +97,11 @@ export default function RegisterForm() {
                         <DialogHeader>
                             <DialogTitle>Syarat Penggunaan Vemer</DialogTitle>
                         </DialogHeader>
-
+                        
                     </DialogContent>
                 </div>
             </Dialog>
+            
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col justify-center">
                 <FormField
                     disabled={isSubmitLoading}
@@ -116,7 +154,7 @@ export default function RegisterForm() {
                                     />
                                     <LucideIcon
                                         icon={isPasswordShown ? "EyeOff" : "Eye"}
-                                        className="absolute right-2 top-1/3 cursor-pointer w-4 h-4"
+                                        className="absolute right-4 top-[.67rem] cursor-pointer w-4 h-4"
                                         onClick={() => setIsPasswordShown(prev => !prev)}
                                     />
                                 </div>
@@ -128,8 +166,20 @@ export default function RegisterForm() {
                 <div className="flex flex-col space-y-2">
                     <h2>Atau daftar dengan:</h2>
                     <div className="flex flex-col md:flex-row items-center justify-center space-x-4">
-                        <Button type="button">Google</Button>
-                        <Button type="button"><LucideIcon icon="Linkedin" />Linkedin</Button>
+                        {
+                            sso.map((_sso, idx) => (
+                                <AnimatedButton
+                                    key={idx}
+                                    onClick={() => setSsoProvider(_sso.provider)}
+                                    type="button"
+                                    icon={_sso.icon}
+                                    disabled={ssoProvider === _sso.provider}
+                                    loading={ssoProvider === _sso.provider}
+                                >
+                                    {_sso.label}
+                                </AnimatedButton>
+                            ))
+                        }
                     </div>
                 </div>
 
