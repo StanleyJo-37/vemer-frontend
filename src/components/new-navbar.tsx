@@ -20,7 +20,7 @@ export function NavbarDemo() {
     },
     {
       name: "Events",
-      link: "/events",
+      link: "/activities",
     },
     {
       name: "Dashboard",

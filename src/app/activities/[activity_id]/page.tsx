@@ -1,11 +1,34 @@
 "use client"
 
+import ActivityAPI from "@/api/ActivityAPI"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, MapPin, Clock, Calendar, Building, Share2, HandHelping, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PillTag } from "@/components/pill-tag"
 
+interface ActivityProp{
+
+}
+
 export default function EventPage() {
+  const { activity_id } = useParams(); 
+  const [activity, setActivity] = useState<ActivityProp|undefined>(undefined);
+
+  useEffect(() => {
+    const getactivity = async() => {
+      const resp = await ActivityAPI.activity_detail(Number(activity_id));
+      if (resp) {
+        setActivity(resp as ActivityProp);
+      } else {
+        console.error("Received invalid activity data:", resp);
+      };
+    };
+
+    getactivity();
+  }, []);
+  
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content */}
