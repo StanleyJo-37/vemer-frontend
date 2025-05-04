@@ -8,7 +8,7 @@ import navs from "@/constants/main-nav";
 import { usePathname } from "next/navigation";
 import useTheme from "@/hooks/useTheme";
 import { Switch } from "./ui/switch";
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import ThemeToggler from "./theme-toggler";
 
 function NavComp({

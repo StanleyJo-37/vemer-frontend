@@ -1,46 +1,46 @@
-"use client";
+"use client"
 
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import LucideIcon from "@/components/lucide-icon";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import AuthAPI from "@/api/AuthAPI";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RegisterRequestType, SocialiteProvider } from "@/types/AuthType";
-import AnimatedButton from "@/components/animated-button";
+import type React from "react"
+
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { useForm } from "react-hook-form"
+import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react"
+import { Checkbox } from "@/components/ui/checkbox"
+import AuthAPI from "@/api/AuthAPI"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { SocialiteProvider } from "@/types/AuthType"
 import { icons } from "lucide-react";
-import { AxiosError } from "axios";
+import { AxiosError } from "axios"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+import AnimatedButton from "@/components/animated-button"
 import { omit } from "lodash";
 import { UserType } from "@/types/UserType";
 
 const RegisterFormSchema = z.object({
-    'email': z.string().email().min(1, {message: "Email wajib diisi."}),
-    'username': z.string().min(1, {message: "Username wajib diisi."}),
-    'password': z.string().min(1, {message: "Password wajib diisi."}),
-    'toc_accept': z.boolean().refine(val => val, { message: "Anda harus menyetujui syarat penggunaan Vemer."}),
-});
+  email: z.string().email().min(1, { message: "Email wajib diisi." }),
+  username: z.string().min(1, { message: "Username wajib diisi." }),
+  password: z.string().min(1, { message: "Password wajib diisi." }),
+  "toc-accept": z.boolean().refine((val) => val, { message: "Anda harus menyetujui syarat penggunaan Vemer." }),
+})
 
-const sso: { label: string; provider: SocialiteProvider, icon: keyof typeof icons }[] = [
-    {
-        label: 'Google',
-        provider: 'google',
-        icon: 'Airplay',
-    },
-    {
-        label: 'LinkedIn',
-        provider: 'linkedin-openid',
-        icon: 'Linkedin',
-    }
-];
-
-type RegisterPayload = Omit<z.infer<typeof RegisterFormSchema>, 'toc_accept'>;
+const sso: { label: string; provider: SocialiteProvider; icon: keyof typeof icons }[] = [
+  {
+    label: "Google",
+    provider: "google",
+    icon: "Airplay",
+  },
+  {
+    label: "LinkedIn",
+    provider: "linkedin-openid",
+    icon: "Linkedin",
+  },
+]
 
 export default function RegisterForm() {
     const [isPasswordShown, setIsPasswordShown] = useState<boolean>(false);
@@ -56,28 +56,26 @@ export default function RegisterForm() {
             'email': "",
             'username': "",
             'password': "",
-            'toc_accept': false,
+            'toc-accept': false,
         },
     });
 
-    useEffect(() => {
-        if (!ssoProvider) return;
-    
-        const ssoLogin = async () => {
-            try {
-                const resp = await AuthAPI.loginSSO(ssoProvider, '', '');
-                
-            } catch (err) {
-                if (err instanceof AxiosError) {
-                    
-                }
-            } finally {
-                setSsoProvider(undefined);
-            }
-        };
-    
-        ssoLogin();
-    }, [ssoProvider]);    
+  useEffect(() => {
+    if (!ssoProvider) return
+
+    const ssoLogin = async () => {
+      try {
+        const resp = await AuthAPI.loginSSO(ssoProvider, "", "")
+      } catch (err) {
+        if (err instanceof AxiosError) {
+        }
+      } finally {
+        setSsoProvider(undefined)
+      }
+    }
+
+    ssoLogin()
+  }, [ssoProvider])
 
     const onSubmit = async(data: z.infer<typeof RegisterFormSchema>) => {
         setIsSubmitLoading(true);

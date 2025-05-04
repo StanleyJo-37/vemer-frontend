@@ -38,7 +38,7 @@ export default function Layout({
 }) {
     return (
         <div className="w-screen h-screen flex justify-center items-center">
-            <div className="w-auto h-auto bg-yellow-100 p-4">
+            <div className="w-auto h-auto p-4">
                 {children}
             </div>
         </div>
