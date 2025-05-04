@@ -1,26 +1,19 @@
-import { SocialiteProvider } from "@/types/AuthType";
+import { LoginRequestType, RegisterRequestType, SocialiteProvider } from "@/types/AuthType";
 import API from "./axios";
 
 const AuthAPI = {
-    register: async(email: string, password: string, username: string) => {
+    register: async(data: RegisterRequestType) => {
         return await API.PublicAPI.request({
             url: '/auth/register',
             method: 'POST',
-            data: {
-                email,
-                password,
-                username,
-            }
+            data,
         });
     },
-    login: async(email: string, password: string) => {
+    login: async(data: LoginRequestType) => {
         return await API.PublicAPI.request({
             url: '/auth/login',
             method: 'POST',
-            data: {
-                email,
-                password,
-            }
+            data,
         });
     },
     loginSSO: async(provider: SocialiteProvider, web_origin: string, target_path: string) => {
