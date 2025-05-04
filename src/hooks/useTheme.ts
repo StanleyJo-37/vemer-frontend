@@ -1,12 +1,13 @@
 "use client";
 
+import { defaultTheme, themes } from "@/constants/theme";
 import { useEffect, useState } from "react";
 
 export default function useTheme() {
-    const [theme, setTheme] = useState<"light"|"dark">("light"); // light / dark
+    const [theme, setTheme] = useState<themes>(defaultTheme);
 
     useEffect(() => {
-        const currTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+        const currTheme = localStorage.getItem("theme") as themes | null;
 
         const initialTheme = currTheme || "light";
         document.documentElement.classList.toggle("dark", initialTheme === "dark");
