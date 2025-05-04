@@ -13,16 +13,18 @@ import AuthAPI from "@/api/AuthAPI";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SocialiteProvider } from "@/types/AuthType";
+import { RegisterRequestType, SocialiteProvider } from "@/types/AuthType";
 import AnimatedButton from "@/components/animated-button";
 import { icons } from "lucide-react";
 import { AxiosError } from "axios";
+import { omit } from "lodash";
+import { UserType } from "@/types/UserType";
 
 const RegisterFormSchema = z.object({
     'email': z.string().email().min(1, {message: "Email wajib diisi."}),
     'username': z.string().min(1, {message: "Username wajib diisi."}),
     'password': z.string().min(1, {message: "Password wajib diisi."}),
-    'toc-accept': z.boolean().refine(val => val, { message: "Anda harus menyetujui syarat penggunaan Vemer."}),
+    'toc_accept': z.boolean().refine(val => val, { message: "Anda harus menyetujui syarat penggunaan Vemer."}),
 });
 
 const sso: { label: string; provider: SocialiteProvider, icon: keyof typeof icons }[] = [
@@ -36,7 +38,9 @@ const sso: { label: string; provider: SocialiteProvider, icon: keyof typeof icon
         provider: 'linkedin-openid',
         icon: 'Linkedin',
     }
-]
+];
+
+type RegisterPayload = Omit<z.infer<typeof RegisterFormSchema>, 'toc_accept'>;
 
 export default function RegisterForm() {
     const [isPasswordShown, setIsPasswordShown] = useState<boolean>(false);
@@ -52,7 +56,7 @@ export default function RegisterForm() {
             'email': "",
             'username': "",
             'password': "",
-            'toc-accept': false,
+            'toc_accept': false,
         },
     });
 
@@ -77,16 +81,23 @@ export default function RegisterForm() {
 
     const onSubmit = async(data: z.infer<typeof RegisterFormSchema>) => {
         setIsSubmitLoading(true);
-        AuthAPI.register(data.email, data.password, data.username)
-                .then(res => {
-                    router.push('/');
-                })
-                .catch(err => {
-                    toast("Terjadi kesalahan saat registrasi.");
-                })
-                .finally(() => {
-                    setIsSubmitLoading(false);
-                })
+
+        try {
+            const payload: RegisterPayload = omit(data, 'toc_accept');
+            
+            const resp = await AuthAPI.register(payload);
+
+            const respData = resp.data as UserType;
+
+            localStorage.removeItem('user');
+            localStorage.setItem('user', JSON.stringify(respData));
+
+            router.push('/auth/profile-completion');
+        } catch (err) {
+            toast("Terjadi kesalahan saat registrasi.");
+        } finally {
+            setIsSubmitLoading(false);
+        }
     }
     
     return (
@@ -186,7 +197,7 @@ export default function RegisterForm() {
                 <FormField
                     disabled={isSubmitLoading}
                     control={form.control}
-                    name="toc-accept"
+                    name="toc_accept"
                     render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-center p-2 space-x-4">
                             <Checkbox
@@ -194,7 +205,7 @@ export default function RegisterForm() {
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
                             />
-                            <FormLabel className="!mt-0" htmlFor="toc-accept">Saya menyetujui <span onClick={() => setIsTocAcceptDialogOpen(true)} className="text-blue-600 hover:text-blue-900">syarat penggunaan Vemer</span>.</FormLabel>
+                            <FormLabel className="!mt-0" htmlFor="toc_accept">Saya menyetujui <span onClick={() => setIsTocAcceptDialogOpen(true)} className="text-blue-600 hover:text-blue-900">syarat penggunaan Vemer</span>.</FormLabel>
                         </FormItem>
                     )}
                 />
