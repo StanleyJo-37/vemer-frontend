@@ -1,7 +1,6 @@
 "use server";
 
-import Navbar from "@/components/navbar";
-import { NavbarDemo } from "@/components/new-navbar";
+import { Navbar } from "@/components/navbar";
 import React from "react";
 
 export default async function Layout({
@@ -11,7 +10,7 @@ export default async function Layout({
 }) {
     return (
         <div className="flex flex-col">
-            <NavbarDemo />
+            <Navbar />
             {children}
         </div>
     );

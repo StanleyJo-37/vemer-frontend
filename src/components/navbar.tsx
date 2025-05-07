@@ -1,67 +1,96 @@
 "use client";
 
-import LucideIcon from "./lucide-icon";
-import Link from "next/link";
-import { NavCompType } from "@/types/NavTypes";
-import { cn } from "@/lib/utils";
-import navs from "@/constants/main-nav";
-import { usePathname } from "next/navigation";
-import useTheme from "@/hooks/useTheme";
-import { Switch } from "./ui/switch";
-import React,{ useEffect, useState } from "react";
-import ThemeToggler from "./theme-toggler";
+import {
+  NavBar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
+import { useState } from "react";
 
-function NavComp({
-    label,
-    href,
-    icon,
-    highlight,
-    active,
-}: NavCompType & { active: boolean }) {
+export function Navbar() {
+  const navItems = [
+    {
+      name: "About",
+      link: "/",
+    },
+    {
+      name: "Events",
+      link: "/activities",
+    },
+    {
+      name: "Dashboard",
+      link: "/(marketing)/dashboard",
+    },
+    {
+      name: "Profile",
+      link: "/(marketing)/users/profile",
+    },
+  ];
 
-    return (
-        <Link
-            href={href}
-            className={cn(
-                "relative flex flex-row space-x-4 text-xl items-center",
-                highlight && "bg-green-400 hover:bg-green-400/50 p-2 rounded-lg",
-                highlight ? "" : active ? "after:w-full" : "after:w-0 hover:after:w-full",
-                !highlight && "after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-green-400/50 after:transition-all after:duration-300"
-            )}
-        >
-            <LucideIcon icon={icon} />
-            <div>{label}</div>
-        </Link>
-    );
-}
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-export default function Navbar() {
-    const pathname = usePathname();
+  return (
+    <div className="relative w-full">
+      <NavBar>
+        <NavBody>
+          <NavbarLogo />
+          <NavItems items={navItems} />
+          <div className="flex items-center gap-4">
+            <NavbarButton variant="dark" href="/auth/login" className="bg-sky-600">Login</NavbarButton>
+            <NavbarButton variant="secondary" href="/auth/register">Register</NavbarButton>
+          </div>
+        </NavBody>
 
-    const [isScrolled, setIsScrolled] = useState<boolean>(false);
+        <MobileNav>
+          <MobileNavHeader>
+            <NavbarLogo />
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </MobileNavHeader>
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10)
-        }
-        window.addEventListener("scroll", handleScroll)
-        return () => window.removeEventListener("scroll", handleScroll)
-    }, []); 
-
-    return (
-        <nav
-            className={cn(
-                "md:flex md:flex-row md:justify-between md:items-center md:w-screen md:px-12 md:py-8 sticky top-0",
-                isScrolled ? "bg-background/95 backdrop-blur-sm shadow-sm py-2" : "bg-background py-4",
-            )}
-        >
-            <Link href="/">
-                LOGO
-            </Link>
-            <div className="flex flex-row w-fit justify-center items-center space-x-24">
-                {navs.map(nav => <NavComp key={nav.href} {...nav} active={pathname === nav.href} />)}
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item, idx) => (
+              <a
+                key={`mobile-link-${idx}`}
+                href={item.link}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative text-neutral-600 dark:text-neutral-300"
+              >
+                <span className="block">{item.name}</span>
+              </a>
+            ))}
+            <div className="flex w-full flex-col gap-4">
+              <NavbarButton
+                onClick={() => setIsMobileMenuOpen(false)}
+                variant="dark"
+                className="w-full bg-sky-600"
+                href="/auth/login"
+              >
+                Login
+              </NavbarButton>
+              <NavbarButton
+                onClick={() => setIsMobileMenuOpen(false)}
+                variant="primary"
+                className="w-full"
+                href="/auth/register"
+              >
+                Register
+              </NavbarButton>
             </div>
-            <ThemeToggler />
-        </nav>
-    );
+          </MobileNavMenu>
+        </MobileNav>
+      </NavBar>
+    </div>
+  );
 }

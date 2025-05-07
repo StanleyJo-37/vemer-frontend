@@ -1,7 +1,7 @@
 "use server";
 
 import Navbar from "@/components/navbar";
-import { NavbarDemo } from "@/components/new-navbar";
+import { NavbarDemo } from "@/components/navbar";
 import React from "react";
 
 export default async function Layout({
