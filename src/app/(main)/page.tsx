@@ -1,12 +1,15 @@
 "use client"
 import { motion } from "framer-motion"
 import { FlipWords } from "@/components/ui/flip-words"
+import { EventCard } from "@/components/event-card"
+import Link from "next/link"
+import { ChevronRight } from "lucide-react"
 
 export default function Page() {
   const words = ["sharing", "serving", "contributing", "supporting"]
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-full font-[family-name:var(--font-geist-sans)] !m-0 relative">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full font-[family-name:var(--font-geist-sans)] !m-0 relative">
       <div className="absolute inset-y-0 left-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
         <div className="absolute top-0 h-40 w-px bg-gradient-to-b from-transparent via-blue-500 to-transparent" />
       </div>
@@ -27,7 +30,7 @@ export default function Page() {
         </div>
 
         <div className="relative z-20 px-6 py-16 md:py-24 flex flex-col items-center min-h-screen justify-center">
-          <h1 className="mx-auto max-w-4xl text-center text-2xl font-bold text-white md:text-4xl lg:text-7xl">
+          <h1 className="mx-auto max-w-4xl text-center text-4xl font-bold text-white lg:text-7xl">
             {"Do not keep you to yourself and start".split(" ").map((word, index) => (
               <motion.span
                 key={index}
@@ -54,7 +57,7 @@ export default function Page() {
               }}
               className="inline-block"
             >
-              <FlipWords words={words} className="text-blue-400" />
+              <FlipWords words={words} className="text-sky-200" />
             </motion.span>
 
             {"back.".split(" ").map((word, index) => (
@@ -64,8 +67,7 @@ export default function Page() {
                 animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
                 transition={{
                   duration: 0.3,
-                  delay: 0.8 + index * 0.1, // Adjust based on previous animations
-                  ease: "easeInOut",
+                  delay: 0.8 + index * 0.1,
                 }}
                 className="mr-2 inline-block"
               >
@@ -74,17 +76,10 @@ export default function Page() {
             ))}
           </h1>
           <motion.p
-            initial={{
-              opacity: 0,
-            }}
-            animate={{
-              opacity: 1,
-            }}
-            transition={{
-              duration: 0.3,
-              delay: 0.9,
-            }}
-            className="mx-auto max-w-xl py-4 text-center text-lg font-normal text-white/90"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.9 }}
+            className="mx-auto max-w-xl py-4 text-center font-normal text-white/90 text-sm lg:text-lg"
           >
             Because sometimes, all it takes is a shift — from me to we, from time off to time well spent. Whether you're
             here to help, connect, or grow, you're just one flipped word away from making a real impact. Explore events
@@ -103,7 +98,7 @@ export default function Page() {
             }}
             className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
-            <button className="w-60 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+            <button className="w-60 bg-sky-600 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
               Explore Now
             </button>
             <button className="w-60 transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
@@ -112,6 +107,52 @@ export default function Page() {
           </motion.div>
         </div>
       </div>
+
+      <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="mb-10 flex items-center justify-between">
+              <h2 className="text-3xl font-bold">Featured Events</h2>
+              <Link href="/events" className="flex items-center text-sm font-medium text-sky-600">
+                View all events
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <EventCard
+                title="Summer Music Festival"
+                image="/placeholder.svg?height=400&width=600"
+                date="Aug 15-17, 2023"
+                location="Central Park, New York"
+                price="$89"
+                category="Music"
+              />
+              <EventCard
+                title="Tech Conference 2023"
+                image="/placeholder.svg?height=400&width=600"
+                date="Sep 5-7, 2023"
+                location="Convention Center, San Francisco"
+                price="$199"
+                category="Technology"
+              />
+              <EventCard
+                title="Food & Wine Expo"
+                image="/placeholder.svg?height=400&width=600"
+                date="Jul 22-23, 2023"
+                location="Grand Hall, Chicago"
+                price="$45"
+                category="Food"
+              />
+              <EventCard
+                title="Art Exhibition"
+                image="/placeholder.svg?height=400&width=600"
+                date="Aug 10-20, 2023"
+                location="Modern Gallery, Los Angeles"
+                price="$25"
+                category="Art"
+              />
+            </div>
+          </div>
+        </section>
     </div>
   )
 }
