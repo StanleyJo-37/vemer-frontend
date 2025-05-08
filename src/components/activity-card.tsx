@@ -13,7 +13,7 @@ interface EventCardProps {
   category: string
 }
 
-export function EventCard({ title, image, date, location, price, category }: EventCardProps) {
+export function ActivityCard({ title, image, date, location, price, category }: EventCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <div className="aspect-[3/2] w-full overflow-hidden">

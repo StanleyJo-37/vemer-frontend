@@ -1,7 +1,7 @@
 "use client"
 import { motion } from "framer-motion"
 import { FlipWords } from "@/components/ui/flip-words"
-import { EventCard } from "@/components/event-card"
+import { ActivityCard } from "@/components/activity-card"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 
@@ -82,7 +82,7 @@ export default function Page() {
             className="mx-auto max-w-xl py-4 text-center font-normal text-white/90 text-sm lg:text-lg"
           >
             Because sometimes, all it takes is a shift — from me to we, from time off to time well spent. Whether you're
-            here to help, connect, or grow, you're just one flipped word away from making a real impact. Explore events
+            here to help, connect, or grow, you're just one flipped word away from making a real impact. Explore activities
             near you and turn your day into something meaningful.
           </motion.p>
           <motion.div
@@ -111,14 +111,14 @@ export default function Page() {
       <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="mb-10 flex items-center justify-between">
-              <h2 className="text-3xl font-bold">Featured Events</h2>
-              <Link href="/events" className="flex items-center text-sm font-medium text-sky-600">
-                View all events
+              <h2 className="text-3xl font-bold">Featured Activities</h2>
+              <Link href="/activities" className="flex items-center text-sm font-medium text-sky-600">
+                View all activities
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <EventCard
+              <ActivityCard
                 title="Summer Music Festival"
                 image="/placeholder.svg?height=400&width=600"
                 date="Aug 15-17, 2023"
@@ -126,7 +126,7 @@ export default function Page() {
                 price="$89"
                 category="Music"
               />
-              <EventCard
+              <ActivityCard
                 title="Tech Conference 2023"
                 image="/placeholder.svg?height=400&width=600"
                 date="Sep 5-7, 2023"
@@ -134,7 +134,7 @@ export default function Page() {
                 price="$199"
                 category="Technology"
               />
-              <EventCard
+              <ActivityCard
                 title="Food & Wine Expo"
                 image="/placeholder.svg?height=400&width=600"
                 date="Jul 22-23, 2023"
@@ -142,7 +142,7 @@ export default function Page() {
                 price="$45"
                 category="Food"
               />
-              <EventCard
+              <ActivityCard
                 title="Art Exhibition"
                 image="/placeholder.svg?height=400&width=600"
                 date="Aug 10-20, 2023"

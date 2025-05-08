@@ -14,12 +14,12 @@ interface ActivityProp{
 
 }
 
-const event = {
+const activitySample = {
   id: "1",
   title: "Beach Clean-up Day",
   image: "/placeholder.svg?height=400&width=800",
   description:
-    "Join us for a day of environmental action as we clean up Ancol Beach. This event brings together volunteers from all walks of life to help preserve our beautiful coastline and protect marine life. We'll provide all necessary equipment including gloves, trash bags, and refreshments.",
+    "Join us for a day of environmental action as we clean up Ancol Beach. This activity brings together volunteers from all walks of life to help preserve our beautiful coastline and protect marine life. We'll provide all necessary equipment including gloves, trash bags, and refreshments.",
   benefits: [
     "Environmental education from marine biologists",
     "Certificate of participation",
@@ -35,7 +35,7 @@ const event = {
 }
 
 
-export default function EventPage() {
+export default function ActivityPage() {
   const { activity_id } = useParams(); 
   const [activity, setActivity] = useState<ActivityProp|undefined>(undefined);
 
@@ -57,23 +57,23 @@ export default function EventPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-4">{event.title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-4">{activitySample.title}</h1>
             <div className="relative w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden">
-              <Image src={event.image || "/placeholder.svg"} alt={event.title} fill className="object-cover" priority />
+              <Image src={activitySample.image || "/placeholder.svg"} alt={activitySample.title} fill className="object-cover" priority />
             </div>
           </div>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-sky-700">About This Event</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-sky-700">About This Activity</h2>
             <div className="prose max-w-none">
-              <p className="text-gray-700">{event.description}</p>
+              <p className="text-gray-700">{activitySample.description}</p>
             </div>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold mb-4 text-sky-700">What You'll Get</h2>
             <ul className="space-y-3">
-              {event.benefits.map((benefit, index) => (
+              {activitySample.benefits.map((benefit, index) => (
                 <li key={index} className="flex items-start">
                   <div className="mr-2 mt-1 h-5 w-5 flex-shrink-0 rounded-full bg-sky-100 flex items-center justify-center">
                     <div className="h-2 w-2 rounded-full bg-sky-500"></div>
@@ -99,8 +99,8 @@ export default function EventPage() {
                       <HandHelping className="h-5 w-5 text-sky-600" />
                     </div>
                     <div>
-                      <p className="font-medium">Event Type</p>
-                      <p className="text-sm text-gray-500">{event.type}</p>
+                      <p className="font-medium">activitySample Type</p>
+                      <p className="text-sm text-gray-500">{activitySample.type}</p>
                     </div>
                   </div>
 
@@ -110,7 +110,7 @@ export default function EventPage() {
                     </div>
                     <div>
                       <p className="font-medium">Date</p>
-                      <p className="text-sm text-gray-500">{event.date}</p>
+                      <p className="text-sm text-gray-500">{activitySample.date}</p>
                     </div>
                   </div>
 
@@ -120,8 +120,8 @@ export default function EventPage() {
                     </div>
                     <div>
                       <p className="font-medium">Location</p>
-                      <p className="text-sm text-gray-500">{event.location}</p>
-                      <p className="text-sm text-gray-700 mt-1">{event.specificLocation}</p>
+                      <p className="text-sm text-gray-500">{activitySample.location}</p>
+                      <p className="text-sm text-gray-700 mt-1">{activitySample.specificLocation}</p>
                     </div>
                   </div>
 
@@ -138,7 +138,7 @@ export default function EventPage() {
 
                 <div className="pt-4 border-t">
                   <Button variant="outline" className="w-full">
-                    Share This Event
+                    Share This Activity
                   </Button>
                 </div>
               </div>

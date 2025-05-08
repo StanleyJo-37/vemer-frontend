@@ -20,16 +20,12 @@ export function Navbar() {
       link: "/",
     },
     {
-      name: "Events",
+      name: "Activities",
       link: "/activities",
     },
     {
       name: "Dashboard",
       link: "/(marketing)/dashboard",
-    },
-    {
-      name: "Profile",
-      link: "/(marketing)/users/profile",
     },
   ];
 
