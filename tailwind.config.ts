@@ -9,6 +9,10 @@ const config: Config = {
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				sans: ['var(--font-geist-sans)'],
+				mono: ['var(--font-geist-mono)'],
+			},
 			animation: {
 				'spin-slow': 'spin 2s linear infinite',
 				'spin-slower': 'spin 5s linear infinite',
