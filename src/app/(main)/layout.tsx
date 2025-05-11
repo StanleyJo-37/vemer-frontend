@@ -1,6 +1,7 @@
 "use server";
 
 import { Navbar } from "@/components/navbar";
+import Footer from "@/components/footer";
 import React from "react";
 
 export default async function Layout({
@@ -12,6 +13,7 @@ export default async function Layout({
         <div className="flex flex-col">
             <Navbar />
             {children}
+            <Footer />
         </div>
     );
 }
