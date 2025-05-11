@@ -99,7 +99,7 @@ export default function ActivityPage() {
                       <HandHelping className="h-5 w-5 text-sky-600" />
                     </div>
                     <div>
-                      <p className="font-medium">activitySample Type</p>
+                      <p className="font-medium">Activity Type</p>
                       <p className="text-sm text-gray-500">{activitySample.type}</p>
                     </div>
                   </div>
