@@ -1,19 +1,27 @@
 "use client"
-import { Calendar, MapPin, Tag, User, Wallet } from "lucide-react"
+import { useState, useEffect } from "react"
+import { CalendarIcon, MapPin, Tag, User, Wallet, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 import type { Activity } from "@/app/activities/page"
-import { JSX, SVGProps } from "react"
+import type { DateRange } from "react-day-picker"
 import { Badge } from "./ui/badge"
 
 interface ActivityFiltersProps {
   activities: Activity[]
   filters: {
     categories: string[]
-    dates: string[]
+    dates: {
+      from: Date | undefined
+      to: Date | undefined
+    }
     locations: string[]
     organizers: string[]
     price: "all" | "free" | "paid"
@@ -22,16 +30,26 @@ interface ActivityFiltersProps {
 }
 
 export function ActivityFilters({ activities, filters, onFilterChange }: ActivityFiltersProps) {
+  // Extract unique values for filter options
   const categories = [...new Set(activities.map((a) => a.category))].sort()
   const locations = [...new Set(activities.map((a) => a.location))].sort()
   const organizers = [...new Set(activities.map((a) => a.organizer))].sort()
 
-  const dateOptions = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date()
-    date.setMonth(date.getMonth() + i)
-    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  // State for date range picker - ensure it's initialized with a valid object
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: filters.dates?.from,
+    to: filters.dates?.to,
   })
 
+  // Update local date state when filters.dates changes
+  useEffect(() => {
+    setDate({
+      from: filters.dates?.from,
+      to: filters.dates?.to,
+    })
+  }, [filters.dates])
+
+  // Handle category filter change
   const handleCategoryChange = (category: string, checked: boolean) => {
     const newCategories = checked ? [...filters.categories, category] : filters.categories.filter((c) => c !== category)
 
@@ -41,15 +59,28 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
     })
   }
 
-  const handleDateChange = (date: string, checked: boolean) => {
-    const newDates = checked ? [...filters.dates, date] : filters.dates.filter((d) => d !== date)
-
+  // Handle date filter change
+  const handleDateChange = (selectedDate: DateRange | undefined) => {
+    setDate(selectedDate)
     onFilterChange({
       ...filters,
-      dates: newDates,
+      dates: {
+        from: selectedDate?.from,
+        to: selectedDate?.to,
+      },
     })
   }
 
+  // Clear date filter
+  const clearDateFilter = () => {
+    setDate(undefined)
+    onFilterChange({
+      ...filters,
+      dates: { from: undefined, to: undefined },
+    })
+  }
+
+  // Handle location filter change
   const handleLocationChange = (location: string, checked: boolean) => {
     const newLocations = checked ? [...filters.locations, location] : filters.locations.filter((l) => l !== location)
 
@@ -59,6 +90,7 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
     })
   }
 
+  // Handle organizer filter change
   const handleOrganizerChange = (organizer: string, checked: boolean) => {
     const newOrganizers = checked
       ? [...filters.organizers, organizer]
@@ -70,6 +102,7 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
     })
   }
 
+  // Handle price filter change
   const handlePriceChange = (value: "all" | "free" | "paid") => {
     onFilterChange({
       ...filters,
@@ -77,22 +110,44 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
     })
   }
 
+  // Clear all filters
   const clearAllFilters = () => {
+    setDate(undefined)
     onFilterChange({
       categories: [],
-      dates: [],
+      dates: { from: undefined, to: undefined },
       locations: [],
       organizers: [],
       price: "all",
     })
   }
 
+  // Count active filters
   const activeFilterCount =
     filters.categories.length +
-    filters.dates.length +
+    (filters.dates?.from || filters.dates?.to ? 1 : 0) +
     filters.locations.length +
     filters.organizers.length +
     (filters.price !== "all" ? 1 : 0)
+
+  // Format date range for display
+  const formatDateRange = () => {
+    if (!filters.dates) return ""
+
+    if (filters.dates.from && filters.dates.to) {
+      if (filters.dates.from.toDateString() === filters.dates.to.toDateString()) {
+        return format(filters.dates.from, "PPP")
+      }
+      return `${format(filters.dates.from, "PPP")} - ${format(filters.dates.to, "PPP")}`
+    }
+    if (filters.dates.from) {
+      return `From ${format(filters.dates.from, "PPP")}`
+    }
+    if (filters.dates.to) {
+      return `Until ${format(filters.dates.to, "PPP")}`
+    }
+    return ""
+  }
 
   return (
     <div className="bg-white rounded-lg border p-4 sticky top-4">
@@ -129,6 +184,14 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
                 </button>
               </Badge>
             ))}
+            {(filters.dates?.from || filters.dates?.to) && (
+              <Badge variant="outline" className="bg-sky-50 text-sky-600 flex items-center gap-1">
+                {formatDateRange()}
+                <button onClick={clearDateFilter} className="ml-1 hover:bg-sky-100 rounded-full">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
             {filters.locations.map((location) => (
               <Badge
                 key={`loc-${location}`}
@@ -156,7 +219,7 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
         </div>
       )}
 
-      <Accordion type="multiple" defaultValue={["category", "price", "location"]}>
+      <Accordion type="multiple" defaultValue={["category", "date", "price", "location"]}>
         {/* Category Filter */}
         <AccordionItem value="category">
           <AccordionTrigger className="py-3">
@@ -183,28 +246,62 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
           </AccordionContent>
         </AccordionItem>
 
-        {/* Date Filter */}
+        {/* Date Filter - Calendar */}
         <AccordionItem value="date">
           <AccordionTrigger className="py-3">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-sky-600" />
+              <CalendarIcon className="h-4 w-4 text-sky-600" />
               <span>Date</span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-2 pt-1">
-              {dateOptions.map((date) => (
-                <div key={date} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`date-${date}`}
-                    checked={filters.dates.includes(date)}
-                    onCheckedChange={(checked) => handleDateChange(date, checked as boolean)}
+            <div className="space-y-4 pt-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date?.from && !date?.to && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date?.from || date?.to ? (
+                      date?.to ? (
+                        <>
+                          {format(date.from!, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(date.from!, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Pick a date or range</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from ? date.from : new Date()}
+                    selected={date}
+                    onSelect={handleDateChange}
+                    numberOfMonths={2}
                   />
-                  <Label htmlFor={`date-${date}`} className="text-sm font-normal cursor-pointer">
-                    {date}
-                  </Label>
-                </div>
-              ))}
+                </PopoverContent>
+              </Popover>
+
+              {(date?.from || date?.to) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearDateFilter}
+                  className="text-sky-600 hover:text-sky-700 hover:bg-sky-50 h-8 px-2 w-full"
+                >
+                  Clear date filter
+                </Button>
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -297,25 +394,5 @@ export function ActivityFilters({ activities, filters, onFilterChange }: Activit
         </AccordionItem>
       </Accordion>
     </div>
-  )
-}
-
-function X(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
   )
 }

@@ -40,10 +40,13 @@ export default function ActivitiesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
-  // Filter states
+  // Filter states - ensure dates object is properly initialized
   const [filters, setFilters] = useState({
     categories: [] as string[],
-    dates: [] as string[],
+    dates: {
+      from: undefined as Date | undefined,
+      to: undefined as Date | undefined,
+    },
     locations: [] as string[],
     organizers: [] as string[],
     price: "all" as "all" | "free" | "paid",
@@ -57,20 +60,15 @@ export default function ActivitiesPage() {
 
   // Fetch initial activities
   useEffect(() => {
-    const fetchActivities = async () => {
-      setIsLoading(true)
-      try {
-        // Simulate API call with mock data
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        setActivities(mockActivities)
-      } catch (error) {
-        console.error("Error fetching activities:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    setIsLoading(true)
+    try {
+      // Load mock data immediately without artificial delay
+      setActivities(mockActivities)
+    } catch (error) {
+      console.error("Error fetching activities:", error)
+    } finally {
+      setIsLoading(false)
     }
-
-    fetchActivities()
   }, [])
 
   // Apply filters and search
@@ -87,14 +85,27 @@ export default function ActivitiesPage() {
       result = result.filter((activity) => filters.categories.includes(activity.category))
     }
 
-    // Apply date filter (simplified for demo)
-    if (filters.dates.length > 0) {
+    // Apply date filter - with null checks
+    if (filters.dates && (filters.dates.from || filters.dates.to)) {
       result = result.filter((activity) => {
-        const activityMonth = new Date(activity.date).getMonth()
-        return filters.dates.some((dateFilter) => {
-          const filterMonth = new Date(dateFilter).getMonth()
-          return activityMonth === filterMonth
-        })
+        const activityDate = new Date(activity.date)
+
+        // If only from date is set
+        if (filters.dates.from && !filters.dates.to) {
+          return activityDate >= filters.dates.from
+        }
+
+        // If only to date is set
+        if (!filters.dates.from && filters.dates.to) {
+          return activityDate <= filters.dates.to
+        }
+
+        // If both dates are set (range)
+        if (filters.dates.from && filters.dates.to) {
+          return activityDate >= filters.dates.from && activityDate <= filters.dates.to
+        }
+
+        return true
       })
     }
 
@@ -129,13 +140,10 @@ export default function ActivitiesPage() {
   }, [inView, hasMore])
 
   // Function to load more activities
-  const loadMoreActivities = useCallback(async () => {
+  const loadMoreActivities = useCallback(() => {
     if (!hasMore || loadingMore) return
 
     setLoadingMore(true)
-
-    // Simulate loading delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
 
     const nextPage = page + 1
     const startIndex = (nextPage - 1) * activitiesPerPage
@@ -245,7 +253,10 @@ export default function ActivitiesPage() {
                     setSearchQuery("")
                     setFilters({
                       categories: [],
-                      dates: [],
+                      dates: {
+                        from: undefined,
+                        to: undefined,
+                      },
                       locations: [],
                       organizers: [],
                       price: "all",
