@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell } from "lucide-react"
+import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye } from "lucide-react"
 import { EditActivityDialog } from "./edit-activity-dialog"
 import { SendNotificationDialog } from "./send-notification-dialog"
+import { ActivityDetailsDialog } from "./activity-details-dialog"
 
 // Mock data for publisher's activities
 const mockPublisherActivities = [
@@ -25,6 +26,35 @@ const mockPublisherActivities = [
     currentParticipants: 18,
     status: "active",
     image: "/placeholder.svg?height=200&width=300",
+    participants: [
+      {
+        id: "p1",
+        name: "John Smith",
+        email: "john.smith@email.com",
+        phone: "+1 (555) 123-4567",
+        joinedAt: "2025-06-10T14:30:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "confirmed",
+      },
+      {
+        id: "p2",
+        name: "Sarah Johnson",
+        email: "sarah.j@email.com",
+        phone: "+1 (555) 987-6543",
+        joinedAt: "2025-06-11T09:15:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "confirmed",
+      },
+      {
+        id: "p3",
+        name: "Mike Chen",
+        email: "mike.chen@email.com",
+        phone: "+1 (555) 456-7890",
+        joinedAt: "2025-06-12T16:45:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "pending",
+      },
+    ],
   },
   {
     id: "2",
@@ -40,6 +70,26 @@ const mockPublisherActivities = [
     currentParticipants: 32,
     status: "active",
     image: "/placeholder.svg?height=200&width=300",
+    participants: [
+      {
+        id: "p4",
+        name: "Emily Davis",
+        email: "emily.davis@email.com",
+        phone: "+1 (555) 234-5678",
+        joinedAt: "2025-06-09T11:20:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "confirmed",
+      },
+      {
+        id: "p5",
+        name: "David Wilson",
+        email: "david.w@email.com",
+        phone: "+1 (555) 345-6789",
+        joinedAt: "2025-06-10T13:30:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "confirmed",
+      },
+    ],
   },
   {
     id: "3",
@@ -55,6 +105,17 @@ const mockPublisherActivities = [
     currentParticipants: 15,
     status: "completed",
     image: "/placeholder.svg?height=200&width=300",
+    participants: [
+      {
+        id: "p6",
+        name: "Lisa Brown",
+        email: "lisa.brown@email.com",
+        phone: "+1 (555) 567-8901",
+        joinedAt: "2025-06-05T10:00:00Z",
+        avatar: "/placeholder.svg?height=40&width=40",
+        status: "completed",
+      },
+    ],
   },
 ]
 
@@ -63,6 +124,7 @@ export function MyActivities() {
   const [searchQuery, setSearchQuery] = useState("")
   const [editingActivity, setEditingActivity] = useState<any>(null)
   const [notificationActivity, setNotificationActivity] = useState<any>(null)
+  const [viewingActivity, setViewingActivity] = useState<any>(null)
 
   const filteredActivities = activities.filter(
     (activity) =>
@@ -79,6 +141,21 @@ export function MyActivities() {
   const handleUpdateActivity = (updatedActivity: any) => {
     setActivities(activities.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)))
     setEditingActivity(null)
+  }
+
+  const handleRemoveParticipant = (activityId: string, participantId: string) => {
+    setActivities(
+      activities.map((activity) => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            participants: activity.participants.filter((p: any) => p.id !== participantId),
+            currentParticipants: activity.currentParticipants - 1,
+          }
+        }
+        return activity
+      }),
+    )
   }
 
   const getStatusColor = (status: string) => {
@@ -116,7 +193,7 @@ export function MyActivities() {
         {filteredActivities.map((activity) => (
           <Card
             key={activity.id}
-            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 min-h-content flex flex-col"
+            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 h-min-content flex flex-col"
           >
             <div className="aspect-video bg-gray-100 relative flex-shrink-0">
               <img
@@ -150,32 +227,43 @@ export function MyActivities() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingActivity(activity)}
+                    className="flex-1 border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setNotificationActivity(activity)}
+                    className="flex-1 border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
+                  >
+                    <Bell className="h-4 w-4 mr-1" />
+                    Notify
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteActivity(activity.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setEditingActivity(activity)}
-                  className="flex-1 border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
+                  onClick={() => setViewingActivity(activity)}
+                  className="w-full border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
                 >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setNotificationActivity(activity)}
-                  className="flex-1 border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
-                >
-                  <Bell className="h-4 w-4 mr-1" />
-                  Notify
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDeleteActivity(activity.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                >
-                  <Trash2 className="h-4 w-4" />
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
                 </Button>
               </div>
             </CardContent>
@@ -205,6 +293,14 @@ export function MyActivities() {
 
       {notificationActivity && (
         <SendNotificationDialog activity={notificationActivity} onClose={() => setNotificationActivity(null)} />
+      )}
+
+      {viewingActivity && (
+        <ActivityDetailsDialog
+          activity={viewingActivity}
+          onClose={() => setViewingActivity(null)}
+          onRemoveParticipant={handleRemoveParticipant}
+        />
       )}
     </div>
   )

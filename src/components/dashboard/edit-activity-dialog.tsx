@@ -25,6 +25,7 @@ export function EditActivityDialog({ activity, onClose, onUpdate }: EditActivity
   const [formData, setFormData] = useState({
     ...activity,
     date: new Date(activity.date),
+    price: activity.price === "Free" ? "0" : activity.price,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [criticalChanges, setCriticalChanges] = useState<string[]>([])
@@ -61,9 +62,15 @@ export function EditActivityDialog({ activity, onClose, onUpdate }: EditActivity
       alert(`Activity updated! Participants will be notified about changes to: ${changeText}`)
     }
 
+    // Determine if activity is free based on price
+    const priceValue = Number.parseFloat(formData.price) || 0
+    const isFree = priceValue === 0
+
     onUpdate({
       ...formData,
       date: formData.date.toISOString().split("T")[0],
+      price: isFree ? "Free" : formData.price,
+      isFree: isFree,
     })
 
     setIsSubmitting(false)
@@ -201,15 +208,29 @@ export function EditActivityDialog({ activity, onClose, onUpdate }: EditActivity
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-price" className="text-gray-700 font-medium">
-                Price
+                Price (enter 0 for free)
               </Label>
               <Input
                 id="edit-price"
-                value={formData.price === "Free" ? "" : formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value || "Free" })}
-                placeholder="Free"
+                type="number"
+                value={formData.price === "Free" ? "0" : formData.price}
+                onChange={(e) => {
+                  const value = e.target.value
+                  const numValue = Number.parseFloat(value) || 0
+                  setFormData({
+                    ...formData,
+                    price: value,
+                    isFree: numValue === 0,
+                  })
+                }}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
                 className="border-gray-200 focus:border-sky-400 focus:ring-sky-400"
               />
+              <p className="text-xs text-gray-500">
+                {formData.isFree ? "This activity is free" : `This activity costs $${formData.price}`}
+              </p>
             </div>
 
             <div className="space-y-2">
