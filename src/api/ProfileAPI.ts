@@ -3,7 +3,7 @@ import API from "./axios";
 const ProfileAPI = {
     me: async() => {
         return API.AuthenticatedAPI.request({
-            url: '/user',
+            url: '/me',
             method: 'GET',
         });
     },

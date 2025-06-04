@@ -1,4 +1,5 @@
 "use client";
+import useAuth from "@/hooks/useAuth";
 
 import {
   NavBar,
@@ -11,9 +12,19 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
-import { useState } from "react";
+import React, { useState } from "react";
 
-export function Navbar() {
+export interface NavbarProps {
+  role: "user"|"unregistered"|"publisher";
+}
+
+export type RoleType = NavbarProps['role']
+
+export const Navbar = () => {
+
+  const user = useAuth();
+  const role:RoleType = !user.isAuthenticated ? "unregistered" : (user.user?.is_publisher ? "publisher" : "user");
+
   const navItems = [
     {
       name: "About",
@@ -29,7 +40,7 @@ export function Navbar() {
     },
     {
       name: "Dashboard",
-      link: "/(marketing)/dashboard",
+      link: role === "user" ? "/user-dashboard" : ( role === "publisher" ? "/publisher-dashboard":"/auth/register"),
     },
   ];
 

@@ -1,14 +1,10 @@
 export interface UserType {
     id: number;
     email: string;
-    profile: ProfileType;
+    name: string;
+    profile_photo_path:string
+    is_publisher:boolean
 }
 
-export interface ProfileType {
-    profile_picture: string;
-    username: string;
-    interest: InterestType[];
-    completion: number;
-}
 
 export type InterestType = "Experience" | "E-Certificate" | "Volunteering" | "SAT Point" | "Community Service Hours";

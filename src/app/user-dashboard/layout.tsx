@@ -8,6 +8,7 @@ export default async function Layout({
 }: {
     children: React.ReactNode,
 }) {
+
     return (
         <div className="flex flex-col">
             <Navbar />

@@ -2,7 +2,7 @@
 
 import ProfileAPI from "@/api/ProfileAPI";
 import AuthContext from "@/context/AuthContext";
-import { User } from "@/types/AuthType";
+import { UserType } from "@/types/UserType";
 import { AxiosError } from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -11,14 +11,14 @@ export default function AuthProvider({
 }: {
     children: React.ReactNode,
 }) {
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<UserType>();
     const [loading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         setIsLoading(true);
         ProfileAPI.me()
                     .then(res => {
-                        setUser(res.data as User);
+                        setUser(res.data as UserType);
                     })
                     .catch(err => {
                         if (err instanceof AxiosError) {
