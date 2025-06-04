@@ -24,6 +24,10 @@ export function Navbar() {
       link: "/activities",
     },
     {
+      name: "Leaderboard",
+      link: "/leaderboard"
+    },
+    {
       name: "Dashboard",
       link: "/(marketing)/dashboard",
     },
