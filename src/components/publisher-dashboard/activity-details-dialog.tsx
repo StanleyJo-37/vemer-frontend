@@ -25,6 +25,9 @@ import {
   UserCheck,
 } from "lucide-react"
 
+// Import the useToast hook
+import { useToast } from "@/hooks/useToast"
+
 interface ActivityDetailsDialogProps {
   activity: any
   onClose: () => void
@@ -38,6 +41,9 @@ export function ActivityDetailsDialog({ activity, onClose, onRemoveParticipant }
   const [reportReason, setReportReason] = useState("")
   const [reportDescription, setReportDescription] = useState("")
   const [participants, setParticipants] = useState(activity.participants || [])
+
+  // Add the toast hook
+  const { toast } = useToast()
 
   const filteredParticipants = participants.filter((participant: any) => {
     const matchesSearch =
@@ -54,15 +60,31 @@ export function ActivityDetailsDialog({ activity, onClose, onRemoveParticipant }
     }
   }
 
+  // Update the handleApproveParticipant function to show a toast notification
   const handleApproveParticipant = (participantId: string, participantName: string) => {
     if (confirm(`Approve ${participantName} for this activity?`)) {
       setParticipants(participants.map((p: any) => (p.id === participantId ? { ...p, status: "confirmed" } : p)))
+
+      // Show a toast notification
+      toast({
+        title: "Participant Approved",
+        description: `${participantName} has been approved for this activity.`,
+        duration: 3000,
+      })
     }
   }
 
+  // Update the handleRejectParticipant function to show a toast notification
   const handleRejectParticipant = (participantId: string, participantName: string) => {
     if (confirm(`Reject ${participantName}'s registration for this activity?`)) {
       setParticipants(participants.map((p: any) => (p.id === participantId ? { ...p, status: "rejected" } : p)))
+
+      // Show a toast notification
+      toast({
+        title: "Participant Rejected",
+        description: `${participantName}'s registration has been rejected.`,
+        duration: 3000,
+      })
     }
   }
 
@@ -98,6 +120,7 @@ export function ActivityDetailsDialog({ activity, onClose, onRemoveParticipant }
     }
   }
 
+  // Update the getParticipantStatusColor function to include a distinct color for pending status
   const getParticipantStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -251,6 +274,60 @@ export function ActivityDetailsDialog({ activity, onClose, onRemoveParticipant }
                     <CardTitle className="text-lg">
                       All Participants ({participants.filter((p: any) => p.status !== "rejected").length})
                     </CardTitle>
+                  </div>
+                  {/* Add a section for pending applications at the top of the participants list */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertCircle className="h-5 w-5 text-yellow-600" />
+                      <h3 className="font-semibold text-yellow-800">Pending Applications</h3>
+                    </div>
+
+                    {pendingParticipants.length > 0 ? (
+                      <div className="space-y-2">
+                        {pendingParticipants.map((participant: any) => (
+                          <div
+                            key={participant.id}
+                            className="flex items-center justify-between p-3 border border-yellow-200 rounded-lg bg-white"
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              <Avatar>
+                                <AvatarImage src={participant.avatar || "/placeholder.svg"} />
+                                <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900">{participant.name}</p>
+                                <p className="text-sm text-gray-600 truncate">{participant.email}</p>
+                                <p className="text-xs text-gray-500">
+                                  Applied: {new Date(participant.joinedAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleApproveParticipant(participant.id, participant.name)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                              >
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRejectParticipant(participant.id, participant.name)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">No pending applications at this time.</p>
+                    )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative flex-1">

@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye, CheckCircle } from "lucide-react"
+import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye, CheckCircle, AlertCircle } from "lucide-react"
 import { EditActivityDialog } from "./edit-activity-dialog"
 import { SendNotificationDialog } from "./send-notification-dialog"
 import { ActivityDetailsDialog } from "./activity-details-dialog"
 import { EndEventDialog } from "./end-event-dialog"
+// Import the PendingApplicationsBadge component
+import { PendingApplicationsBadge } from "@/components/publisher-dashboard/pending-applications-badge"
 
 // Mock data for publisher's activities
 const mockPublisherActivities = [
@@ -135,6 +137,11 @@ const mockPublisherActivities = [
   },
 ]
 
+// Add a function to count pending applications for each activity
+const getPendingApplicationsCount = (activity: any) => {
+  return activity.participants?.filter((p: any) => p.status === "pending").length || 0
+}
+
 export function MyActivities() {
   const [activities, setActivities] = useState(mockPublisherActivities)
   const [searchQuery, setSearchQuery] = useState("")
@@ -242,7 +249,12 @@ export function MyActivities() {
               <Badge className={`absolute top-2 right-2 ${getStatusColor(activity.status)}`}>{activity.status}</Badge>
             </div>
             <CardHeader className="flex-shrink-0 pb-3">
-              <CardTitle className="text-lg text-sky-900 line-clamp-1">{activity.title}</CardTitle>
+              {/* Use the component in the activity card title section */}
+              {/* Add this after the activity title in the CardHeader section */}
+              <div className="flex items-start justify-between mb-2">
+                <CardTitle className="text-lg text-sky-900 line-clamp-1">{activity.title}</CardTitle>
+                <PendingApplicationsBadge count={getPendingApplicationsCount(activity)} />
+              </div>
               <CardDescription className="line-clamp-2 h-10">{activity.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col justify-between p-6 pt-0">
@@ -263,6 +275,12 @@ export function MyActivities() {
                     {activity.currentParticipants}/{activity.maxParticipants} participants
                   </span>
                 </div>
+                {getPendingApplicationsCount(activity) > 0 && (
+                  <div className="flex items-center gap-2 mt-1 text-sm text-yellow-600">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{getPendingApplicationsCount(activity)} pending applications</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -376,7 +394,7 @@ export function MyActivities() {
         <EndEventDialog
           activity={endingActivity}
           onClose={() => setEndingActivity(null)}
-          onEndEvent={(attendanceData: { [key: string]: boolean }) => handleEndEvent(endingActivity.id, attendanceData)}
+          onEndEvent={(attendanceData) => handleEndEvent(endingActivity.id, attendanceData)}
         />
       )}
     </div>
