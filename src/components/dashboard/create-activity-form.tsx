@@ -4,13 +4,14 @@ import type React from "react"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users, Star, Award, MessageSquare, Link } from "lucide-react"
 
 export function CreateActivityForm() {
   const [formData, setFormData] = useState({
@@ -24,8 +25,28 @@ export function CreateActivityForm() {
     price: "",
     isFree: true,
     maxParticipants: "",
+    points: "",
     images: [] as File[],
     thumbnailIndex: 0,
+    // Badge creation fields
+    createBadge: false,
+    badgeName: "",
+    badgeDescription: "",
+    badgeIcon: null as File | null,
+    badgeRarity: "Common",
+    // Join popup fields
+    enableJoinPopup: false,
+    joinPopupTitle: "",
+    joinPopupMessage: "",
+    joinPopupType: "message" as "message",
+    externalFormUrl: "",
+    customFormFields: [] as Array<{
+      id: string
+      label: string
+      type: "text" | "email" | "phone" | "textarea" | "select"
+      required: boolean
+      options?: string[]
+    }>,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,8 +73,20 @@ export function CreateActivityForm() {
       price: "",
       isFree: true,
       maxParticipants: "",
+      points: "",
       images: [],
       thumbnailIndex: 0,
+      createBadge: false,
+      badgeName: "",
+      badgeDescription: "",
+      badgeIcon: null,
+      badgeRarity: "Common",
+      enableJoinPopup: false,
+      joinPopupTitle: "",
+      joinPopupMessage: "",
+      joinPopupType: "message",
+      externalFormUrl: "",
+      customFormFields: [],
     })
 
     setIsSubmitting(false)
@@ -62,6 +95,11 @@ export function CreateActivityForm() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     setFormData({ ...formData, images: [...formData.images, ...files] })
+  }
+
+  const handleBadgeIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    setFormData({ ...formData, badgeIcon: file })
   }
 
   const removeImage = (index: number) => {
@@ -77,6 +115,48 @@ export function CreateActivityForm() {
     setFormData({ ...formData, thumbnailIndex: index })
   }
 
+  const addCustomFormField = () => {
+    const newField = {
+      id: `field_${Date.now()}`,
+      label: "",
+      type: "text" as const,
+      required: false,
+    }
+    setFormData({
+      ...formData,
+      customFormFields: [...formData.customFormFields, newField],
+    })
+  }
+
+  const updateCustomFormField = (index: number, updates: Partial<(typeof formData.customFormFields)[0]>) => {
+    const updatedFields = formData.customFormFields.map((field, i) => (i === index ? { ...field, ...updates } : field))
+    setFormData({ ...formData, customFormFields: updatedFields })
+  }
+
+  const removeCustomFormField = (index: number) => {
+    setFormData({
+      ...formData,
+      customFormFields: formData.customFormFields.filter((_, i) => i !== index),
+    })
+  }
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case "Common":
+        return "bg-gray-100 text-gray-800 border-gray-200"
+      case "Uncommon":
+        return "bg-green-100 text-green-800 border-green-200"
+      case "Rare":
+        return "bg-sky-100 text-sky-800 border-sky-200"
+      case "Epic":
+        return "bg-purple-100 text-purple-800 border-purple-200"
+      case "Legendary":
+        return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto">
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -89,7 +169,7 @@ export function CreateActivityForm() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter event's title"
-              className="text-lg border-gray-200 focus:border-sky-400 focus:ring-sky-400"
+              className="text-lg border-gray-200 focus:border-sky-500 focus:ring-sky-500"
               required
             />
           </div>
@@ -154,7 +234,7 @@ export function CreateActivityForm() {
                 type="button"
                 variant="outline"
                 onClick={() => document.getElementById("images")?.click()}
-                className="w-full border-dashed border-2 border-gray-300 hover:border-sky-400 h-12"
+                className="w-full border-dashed border-2 border-gray-300 hover:border-sky-500 h-12"
               >
                 <Upload className="h-5 w-5 mr-2" />
                 Upload Images
@@ -170,7 +250,7 @@ export function CreateActivityForm() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Write your event description here"
               rows={6}
-              className="border-gray-200 focus:border-sky-400 focus:ring-sky-400 bg-sky-50"
+              className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
               required
             />
           </div>
@@ -183,8 +263,206 @@ export function CreateActivityForm() {
               onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
               placeholder="Write your event's benefit"
               rows={4}
-              className="border-gray-200 focus:border-sky-400 focus:ring-sky-400 bg-sky-50"
+              className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
             />
+          </div>
+
+          {/* Join Popup Configuration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Join Event Configuration</h2>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="enable-join-popup"
+                  checked={formData.enableJoinPopup}
+                  onCheckedChange={(checked) => setFormData({ ...formData, enableJoinPopup: checked })}
+                />
+                <Label htmlFor="enable-join-popup" className="text-sm font-medium">
+                  Show popup when users join
+                </Label>
+              </div>
+            </div>
+
+            {formData.enableJoinPopup && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardHeader>
+                  <CardTitle className="text-lg text-orange-900 flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Join Event Popup
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Popup Type</Label>
+                    <Select
+                      value={formData.joinPopupType}
+                      onValueChange={(value: any) => setFormData({ ...formData, joinPopupType: value })}
+                    >
+                      <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="message">Simple Message</SelectItem>
+                        <SelectItem value="external">External Link (Google Form, etc.)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Popup Title</Label>
+                    <Input
+                      value={formData.joinPopupTitle}
+                      onChange={(e) => setFormData({ ...formData, joinPopupTitle: e.target.value })}
+                      placeholder="e.g., Welcome to our event!"
+                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  {/* Preview */}
+                  <div className="pt-4 border-t border-orange-200">
+                    <Label className="text-sm font-medium mb-2 block">Preview</Label>
+                    <div className="p-4 bg-white rounded-lg border border-orange-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Event"}</h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {formData.joinPopupMessage || "Thank you for your interest in joining this event!"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Badge Creation Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Create Event Badge</h2>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="create-badge"
+                  checked={formData.createBadge}
+                  onCheckedChange={(checked) => setFormData({ ...formData, createBadge: checked })}
+                />
+                <Label htmlFor="create-badge" className="text-sm font-medium">
+                  Create custom badge
+                </Label>
+              </div>
+            </div>
+
+            {formData.createBadge && (
+              <Card className="border-sky-200 bg-sky-50">
+                <CardHeader>
+                  <CardTitle className="text-lg text-sky-900 flex items-center gap-2">
+                    <Award className="h-5 w-5" />
+                    Badge Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Badge Name</Label>
+                      <Input
+                        value={formData.badgeName}
+                        onChange={(e) => setFormData({ ...formData, badgeName: e.target.value })}
+                        placeholder="e.g., Green Warrior"
+                        className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Rarity</Label>
+                      <Select
+                        value={formData.badgeRarity}
+                        onValueChange={(value) => setFormData({ ...formData, badgeRarity: value })}
+                      >
+                        <SelectTrigger className="border-gray-200 focus:border-sky-500 focus:ring-sky-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Common">Common</SelectItem>
+                          <SelectItem value="Uncommon">Uncommon</SelectItem>
+                          <SelectItem value="Rare">Rare</SelectItem>
+                          <SelectItem value="Epic">Epic</SelectItem>
+                          <SelectItem value="Legendary">Legendary</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Badge Description</Label>
+                    <Textarea
+                      value={formData.badgeDescription}
+                      onChange={(e) => setFormData({ ...formData, badgeDescription: e.target.value })}
+                      placeholder="Describe what this badge represents"
+                      rows={2}
+                      className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Badge Icon</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id="badge-icon"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBadgeIconUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById("badge-icon")?.click()}
+                        className="border-dashed border-2 border-gray-300 hover:border-sky-500"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Icon
+                      </Button>
+                      {formData.badgeIcon && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600">{formData.badgeIcon.name}</span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({ ...formData, badgeIcon: null })}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Badge Preview */}
+                  {formData.badgeName && (
+                    <div className="pt-4 border-t border-sky-200">
+                      <Label className="text-sm font-medium mb-2 block">Preview</Label>
+                      <div className="inline-flex items-center gap-2 p-3 bg-white rounded-lg border border-sky-200">
+                        <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                          {formData.badgeIcon ? (
+                            <img
+                              src={URL.createObjectURL(formData.badgeIcon) || "/placeholder.svg"}
+                              alt="Badge icon"
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <Award className="h-4 w-4 text-sky-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">{formData.badgeName}</p>
+                          <Badge className={`${getRarityColor(formData.badgeRarity)} text-xs cursor-default`}>
+                            {formData.badgeRarity}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
@@ -224,7 +502,7 @@ export function CreateActivityForm() {
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
                 >
-                  <SelectTrigger className="border-gray-200">
+                  <SelectTrigger className="border-gray-200 focus:border-sky-500 focus:ring-sky-500">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -248,7 +526,7 @@ export function CreateActivityForm() {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="border-gray-200"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
               </div>
@@ -263,7 +541,7 @@ export function CreateActivityForm() {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="border-gray-200"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
               </div>
@@ -278,7 +556,7 @@ export function CreateActivityForm() {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="Enter location"
-                  className="border-gray-200"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
               </div>
@@ -295,8 +573,26 @@ export function CreateActivityForm() {
                   onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
                   placeholder="Enter max participants"
                   min="1"
-                  className="border-gray-200"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                 />
+              </div>
+
+              {/* Points */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  <Label className="text-sm font-medium">Points Reward</Label>
+                </div>
+                <Input
+                  type="number"
+                  value={formData.points}
+                  onChange={(e) => setFormData({ ...formData, points: e.target.value })}
+                  placeholder="Points participants will earn"
+                  min="0"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+                <p className="text-xs text-gray-500">Points participants will earn for attending this event</p>
               </div>
 
               {/* Price */}
@@ -319,7 +615,7 @@ export function CreateActivityForm() {
                   placeholder="0.00 (Free)"
                   min="0"
                   step="0.01"
-                  className="border-gray-200"
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                 />
                 <p className="text-xs text-gray-500">
                   {formData.isFree ? "This event is free" : `This event costs $${formData.price}`}
@@ -341,10 +637,10 @@ export function CreateActivityForm() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Badge className="bg-red-100 text-red-800 cursor-default pointer-events-none transition-none hover:animate-none">Add Category</Badge>
-                <Badge className="bg-green-100 text-green-800 cursor-default pointer-events-none transition-none hover:animate-none">Approved ✓</Badge>
-                <Badge className="bg-yellow-100 text-yellow-800 cursor-default pointer-events-none transition-none hover:animate-none">Technology ⚡</Badge>
-                <Badge className="bg-purple-100 text-purple-800 cursor-default pointer-events-none transition-none hover:animate-none">Education 📚</Badge>
+                <Badge className="bg-red-100 text-red-800 cursor-default">Add Category</Badge>
+                <Badge className="bg-green-100 text-green-800 cursor-default">Approved ✓</Badge>
+                <Badge className="bg-yellow-100 text-yellow-800 cursor-default">Technology ⚡</Badge>
+                <Badge className="bg-purple-100 text-purple-800 cursor-default">Education 📚</Badge>
               </div>
             </CardContent>
           </Card>

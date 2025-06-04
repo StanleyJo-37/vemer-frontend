@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye } from "lucide-react"
+import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye, CheckCircle } from "lucide-react"
 import { EditActivityDialog } from "./edit-activity-dialog"
 import { SendNotificationDialog } from "./send-notification-dialog"
 import { ActivityDetailsDialog } from "./activity-details-dialog"
+import { EndEventDialog } from "./end-event-dialog"
 
 // Mock data for publisher's activities
 const mockPublisherActivities = [
@@ -25,7 +26,14 @@ const mockPublisherActivities = [
     maxParticipants: 25,
     currentParticipants: 18,
     status: "active",
+    points: 150,
     image: "/placeholder.svg?height=200&width=300",
+    badge: {
+      name: "Garden Guardian",
+      description: "Participated in community garden cleanup",
+      rarity: "Common",
+      icon: "🌱",
+    },
     participants: [
       {
         id: "p1",
@@ -69,7 +77,14 @@ const mockPublisherActivities = [
     maxParticipants: 50,
     currentParticipants: 32,
     status: "active",
+    points: 200,
     image: "/placeholder.svg?height=200&width=300",
+    badge: {
+      name: "Ocean Protector",
+      description: "Helped protect marine life through beach cleanup",
+      rarity: "Uncommon",
+      icon: "🌊",
+    },
     participants: [
       {
         id: "p4",
@@ -104,6 +119,7 @@ const mockPublisherActivities = [
     maxParticipants: 15,
     currentParticipants: 15,
     status: "completed",
+    points: 180,
     image: "/placeholder.svg?height=200&width=300",
     participants: [
       {
@@ -125,6 +141,7 @@ export function MyActivities() {
   const [editingActivity, setEditingActivity] = useState<any>(null)
   const [notificationActivity, setNotificationActivity] = useState<any>(null)
   const [viewingActivity, setViewingActivity] = useState<any>(null)
+  const [endingActivity, setEndingActivity] = useState<any>(null)
 
   const filteredActivities = activities.filter(
     (activity) =>
@@ -158,6 +175,21 @@ export function MyActivities() {
     )
   }
 
+  const handleEndEvent = (activityId: string, attendanceData: { [key: string]: boolean }) => {
+    setActivities(
+      activities.map((activity) => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            status: "completed",
+          }
+        }
+        return activity
+      }),
+    )
+    setEndingActivity(null)
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -169,6 +201,12 @@ export function MyActivities() {
       default:
         return "bg-sky-100 text-sky-800 border-sky-200"
     }
+  }
+
+  const canEndEvent = (activity: any) => {
+    const eventDate = new Date(activity.date)
+    const today = new Date()
+    return activity.status === "active" && eventDate <= today
   }
 
   return (
@@ -184,7 +222,7 @@ export function MyActivities() {
             placeholder="Search activities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 border-sky-200 focus:border-sky-400 focus:ring-sky-400"
+            className="pl-10 border-sky-200 focus:border-sky-500 focus:ring-sky-500"
           />
         </div>
       </div>
@@ -193,7 +231,7 @@ export function MyActivities() {
         {filteredActivities.map((activity) => (
           <Card
             key={activity.id}
-            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 h-min-content flex flex-col"
+            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 min-h-content flex flex-col"
           >
             <div className="aspect-video bg-gray-100 relative flex-shrink-0">
               <img
@@ -227,7 +265,24 @@ export function MyActivities() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {/* Rewards Section */}
+                <div className="bg-sky-50 p-3 rounded-lg border border-sky-200">
+                  <h4 className="text-sm font-semibold text-sky-900 mb-2">Event Rewards</h4>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-yellow-600">⭐</span>
+                      <span>{activity.points} points</span>
+                    </div>
+                    {activity.badge && (
+                      <div className="flex items-center gap-2">
+                        <span>{activity.badge.icon}</span>
+                        <span>{activity.badge.name} badge</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -256,15 +311,29 @@ export function MyActivities() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewingActivity(activity)}
-                  className="w-full border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
-                </Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewingActivity(activity)}
+                    className="flex-1 border-sky-200 text-sky-700 hover:bg-sky-50 hover:border-sky-300"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                  {canEndEvent(activity) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEndingActivity(activity)}
+                      className="flex-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      End Event
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -300,6 +369,14 @@ export function MyActivities() {
           activity={viewingActivity}
           onClose={() => setViewingActivity(null)}
           onRemoveParticipant={handleRemoveParticipant}
+        />
+      )}
+
+      {endingActivity && (
+        <EndEventDialog
+          activity={endingActivity}
+          onClose={() => setEndingActivity(null)}
+          onEndEvent={(attendanceData: { [key: string]: boolean }) => handleEndEvent(endingActivity.id, attendanceData)}
         />
       )}
     </div>
