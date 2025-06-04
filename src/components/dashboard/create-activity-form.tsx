@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users, Star, Award } from "lucide-react"
+import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users, Star, Award, MessageSquare, Link } from "lucide-react"
 
 export function CreateActivityForm() {
   const [formData, setFormData] = useState({
@@ -34,6 +34,19 @@ export function CreateActivityForm() {
     badgeDescription: "",
     badgeIcon: null as File | null,
     badgeRarity: "Common",
+    // Join popup fields
+    enableJoinPopup: false,
+    joinPopupTitle: "",
+    joinPopupMessage: "",
+    joinPopupType: "message" as "message",
+    externalFormUrl: "",
+    customFormFields: [] as Array<{
+      id: string
+      label: string
+      type: "text" | "email" | "phone" | "textarea" | "select"
+      required: boolean
+      options?: string[]
+    }>,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,6 +81,12 @@ export function CreateActivityForm() {
       badgeDescription: "",
       badgeIcon: null,
       badgeRarity: "Common",
+      enableJoinPopup: false,
+      joinPopupTitle: "",
+      joinPopupMessage: "",
+      joinPopupType: "message",
+      externalFormUrl: "",
+      customFormFields: [],
     })
 
     setIsSubmitting(false)
@@ -94,6 +113,31 @@ export function CreateActivityForm() {
 
   const setThumbnail = (index: number) => {
     setFormData({ ...formData, thumbnailIndex: index })
+  }
+
+  const addCustomFormField = () => {
+    const newField = {
+      id: `field_${Date.now()}`,
+      label: "",
+      type: "text" as const,
+      required: false,
+    }
+    setFormData({
+      ...formData,
+      customFormFields: [...formData.customFormFields, newField],
+    })
+  }
+
+  const updateCustomFormField = (index: number, updates: Partial<(typeof formData.customFormFields)[0]>) => {
+    const updatedFields = formData.customFormFields.map((field, i) => (i === index ? { ...field, ...updates } : field))
+    setFormData({ ...formData, customFormFields: updatedFields })
+  }
+
+  const removeCustomFormField = (index: number) => {
+    setFormData({
+      ...formData,
+      customFormFields: formData.customFormFields.filter((_, i) => i !== index),
+    })
   }
 
   const getRarityColor = (rarity: string) => {
@@ -221,6 +265,72 @@ export function CreateActivityForm() {
               rows={4}
               className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
             />
+          </div>
+
+          {/* Join Popup Configuration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Join Event Configuration</h2>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="enable-join-popup"
+                  checked={formData.enableJoinPopup}
+                  onCheckedChange={(checked) => setFormData({ ...formData, enableJoinPopup: checked })}
+                />
+                <Label htmlFor="enable-join-popup" className="text-sm font-medium">
+                  Show popup when users join
+                </Label>
+              </div>
+            </div>
+
+            {formData.enableJoinPopup && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardHeader>
+                  <CardTitle className="text-lg text-orange-900 flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Join Event Popup
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Popup Type</Label>
+                    <Select
+                      value={formData.joinPopupType}
+                      onValueChange={(value: any) => setFormData({ ...formData, joinPopupType: value })}
+                    >
+                      <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="message">Simple Message</SelectItem>
+                        <SelectItem value="external">External Link (Google Form, etc.)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Popup Title</Label>
+                    <Input
+                      value={formData.joinPopupTitle}
+                      onChange={(e) => setFormData({ ...formData, joinPopupTitle: e.target.value })}
+                      placeholder="e.g., Welcome to our event!"
+                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  {/* Preview */}
+                  <div className="pt-4 border-t border-orange-200">
+                    <Label className="text-sm font-medium mb-2 block">Preview</Label>
+                    <div className="p-4 bg-white rounded-lg border border-orange-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Event"}</h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {formData.joinPopupMessage || "Thank you for your interest in joining this event!"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Badge Creation Section */}

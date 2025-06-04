@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { JoinEventPopup } from "@/components/join-event-popup"
 import {
   Calendar,
   MapPin,
@@ -20,7 +21,7 @@ import {
 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
-// Simple mock data - make sure this matches your activities page
+// Updated mock data with simplified join popup configurations
 const mockActivities = [
   {
     id: "1",
@@ -44,6 +45,11 @@ const mockActivities = [
       description: "Participated in community garden cleanup",
       rarity: "Common",
       icon: "🌱",
+    },
+    joinPopup: {
+      title: "Welcome to our Garden Cleanup!",
+      message:
+        "Thank you for joining our community garden cleanup! We're excited to have you help us beautify our neighborhood. Please fill out our registration form at https://forms.google.com/garden-cleanup to help us organize the event better. Don't forget to bring your own tools if you have them!",
     },
   },
   {
@@ -69,6 +75,11 @@ const mockActivities = [
       rarity: "Uncommon",
       icon: "🌊",
     },
+    joinPopup: {
+      title: "Join the Ocean Protection Mission!",
+      message:
+        "Welcome to our beach cleanup initiative! To ensure we have all the necessary supplies and can coordinate transportation, please complete our detailed registration at https://forms.google.com/beach-cleanup-registration. We'll also send you important updates via our WhatsApp group: https://chat.whatsapp.com/beach-cleanup-group",
+    },
   },
   {
     id: "3",
@@ -92,6 +103,11 @@ const mockActivities = [
       description: "Volunteered at local food bank",
       rarity: "Common",
       icon: "🤝",
+    },
+    joinPopup: {
+      title: "Thank you for volunteering!",
+      message:
+        "Your willingness to help fight food insecurity in our community is truly appreciated. We're looking forward to working alongside you to make a difference in people's lives. Please arrive 15 minutes early for a brief orientation.",
     },
   },
   {
@@ -117,6 +133,7 @@ const mockActivities = [
       rarity: "Uncommon",
       icon: "📚",
     },
+    // No join popup - direct join
   },
   {
     id: "5",
@@ -141,6 +158,11 @@ const mockActivities = [
       rarity: "Rare",
       icon: "💻",
     },
+    joinPopup: {
+      title: "Welcome to Code for Tomorrow!",
+      message:
+        "We're excited to introduce you to the world of programming! Since this workshop is for youth ages 10-16, we need parent/guardian consent. Please have a parent complete our registration form at https://forms.google.com/youth-coding-consent and review our safety guidelines at https://www.codetomorrow.org/safety-guidelines",
+    },
   },
   {
     id: "6",
@@ -164,6 +186,11 @@ const mockActivities = [
       description: "Contributed to community mural project",
       rarity: "Rare",
       icon: "🎨",
+    },
+    joinPopup: {
+      title: "Join Our Creative Community!",
+      message:
+        "Welcome to our community mural project! We're thrilled to have you contribute to this lasting piece of art. Check out our inspiration board at https://pinterest.com/community-mural and join our artist Discord community at https://discord.gg/community-artists for updates and to connect with fellow artists!",
     },
   },
 ]
@@ -209,6 +236,7 @@ export default function ActivityDetailsPage() {
   const [activity, setActivity] = useState<any>(null)
   const [isJoined, setIsJoined] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showJoinPopup, setShowJoinPopup] = useState(false)
 
   useEffect(() => {
     // Get the ID from the URL using useParams
@@ -232,7 +260,19 @@ export default function ActivityDetailsPage() {
   }, [params])
 
   const handleJoinActivity = () => {
-    setIsJoined(!isJoined)
+    if (activity?.joinPopup) {
+      setShowJoinPopup(true)
+    } else {
+      // Direct join without popup
+      setIsJoined(true)
+      alert("Successfully joined the event!")
+    }
+  }
+
+  const handleJoinConfirm = () => {
+    setIsJoined(true)
+    setShowJoinPopup(false)
+    alert("Successfully joined the event!")
   }
 
   const handleShare = () => {
@@ -428,6 +468,7 @@ export default function ActivityDetailsPage() {
                 className={`w-full ${isJoined ? "bg-sky-100 text-sky-700 border-sky-200" : "bg-sky-600 hover:bg-sky-700"}`}
                 onClick={handleJoinActivity}
                 variant={isJoined ? "outline" : "default"}
+                disabled={isJoined}
               >
                 {isJoined ? (
                   <>
@@ -554,6 +595,14 @@ export default function ActivityDetailsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Join Event Popup */}
+      <JoinEventPopup
+        isOpen={showJoinPopup}
+        onClose={() => setShowJoinPopup(false)}
+        onJoin={handleJoinConfirm}
+        activity={activity}
+      />
     </div>
   )
 }

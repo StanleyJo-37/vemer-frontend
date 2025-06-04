@@ -231,7 +231,7 @@ export function MyActivities() {
         {filteredActivities.map((activity) => (
           <Card
             key={activity.id}
-            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 h-[580px] flex flex-col"
+            className="overflow-hidden border-sky-100 hover:border-sky-200 hover:shadow-lg transition-all duration-200 min-h-content flex flex-col"
           >
             <div className="aspect-video bg-gray-100 relative flex-shrink-0">
               <img
