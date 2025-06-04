@@ -216,17 +216,17 @@ const parseBenefits = (benefits: string): string[] => {
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
     case "Common":
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
     case "Uncommon":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-green-100 text-green-800 border-green-200 pointer-events-none transition-none hover:animate-none"
     case "Rare":
-      return "bg-sky-100 text-sky-800 border-sky-200"
+      return "bg-sky-100 text-sky-800 border-sky-200 pointer-events-none transition-none hover:animate-none"
     case "Epic":
-      return "bg-purple-100 text-purple-800 border-purple-200"
+      return "bg-purple-100 text-purple-800 border-purple-200 pointer-events-none transition-none hover:animate-none"
     case "Legendary":
-      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
+      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300 pointer-events-none transition-none hover:animate-none"
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
   }
 }
 

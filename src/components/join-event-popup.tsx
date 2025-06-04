@@ -7,7 +7,7 @@ import { CheckCircle, ExternalLink } from "lucide-react"
 interface JoinEventPopupProps {
   isOpen: boolean
   onClose: () => void
-  onJoin: () => void
+  onJoin: (status: string) => void
   activity: {
     title: string
     joinPopup?: {
@@ -51,12 +51,13 @@ export function JoinEventPopup({ isOpen, onClose, onJoin, activity }: JoinEventP
 
   if (!joinPopup) {
     // If no popup configuration, just join directly
-    onJoin()
+    onJoin("confirmed")
     return null
   }
 
   const handleJoin = () => {
-    onJoin()
+    // For events with popups, set status to "pending" instead of confirmed
+    onJoin("pending")
     onClose()
   }
 
@@ -72,12 +73,9 @@ export function JoinEventPopup({ isOpen, onClose, onJoin, activity }: JoinEventP
           <div className="text-gray-700 leading-relaxed">{renderMessageWithLinks(joinPopup.message)}</div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={onClose} className="border-gray-300">
-              Cancel
-            </Button>
             <Button onClick={handleJoin} className="bg-sky-600 hover:bg-sky-700 text-white">
               <CheckCircle className="h-4 w-4 mr-2" />
-              Join Event
+              Submit Application
             </Button>
           </div>
         </div>

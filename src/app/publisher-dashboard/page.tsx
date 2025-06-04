@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Calendar, Bell, BarChart3 } from "lucide-react"
-import { CreateActivityForm } from "@/components/dashboard/create-activity-form"
-import { MyActivities } from "@/components/dashboard/my-activities"
-import { ActivityNotifications } from "@/components/dashboard/activity-notifications"
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { RecentActivityCards } from "@/components/dashboard/recent-activity-cards"
+import { CreateActivityForm } from "@/components/publisher-dashboard/create-activity-form"
+import { MyActivities } from "@/components/publisher-dashboard/my-activities"
+import { ActivityNotifications } from "@/components/publisher-dashboard/activity-notifications"
+import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats"
+import { RecentActivityCards } from "@/components/publisher-dashboard/recent-activity-cards"
 import { cn } from "@/lib/utils"
 
 const tabs = [
