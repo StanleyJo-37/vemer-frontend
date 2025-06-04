@@ -9,117 +9,104 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trophy, Medal, Crown, Star, TrendingUp, Users, Calendar } from "lucide-react"
 import { motion } from "framer-motion"
 
+interface UserFormat {
+    id:number,
+    name: string,
+    avatar: string,
+    points: number,
+    eventsAttended: number,
+    rank: number,
+    level: "Bronze"|"Silver"|"Gold"|"Alpha"|"Sigma",
+}
+
 // Mock leaderboard data
-const mockLeaderboardData = [
+const mockLeaderboardData:UserFormat[] = [
   {
-    id: "1",
+    id: 1,
     name: "Sarah Johnson",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2850,
     eventsAttended: 28,
     rank: 1,
-    badge: "Environmental Champion",
-    streak: 12,
     level: "Gold",
-    joinedDate: "2024-01-15",
-    recentActivity: "Beach Cleanup Drive",
+
   },
   {
-    id: "2",
+    id: 2,
     name: "Mike Chen",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2720,
     eventsAttended: 25,
     rank: 2,
-    badge: "Community Hero",
-    streak: 8,
     level: "Gold",
-    joinedDate: "2024-02-03",
-    recentActivity: "Food Bank Volunteer Day",
+
   },
   {
-    id: "3",
+    id: 3,
     name: "Emily Davis",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2650,
     eventsAttended: 24,
     rank: 3,
-    badge: "Education Advocate",
-    streak: 15,
     level: "Gold",
-    joinedDate: "2024-01-28",
-    recentActivity: "Youth Coding Workshop",
+
   },
   {
-    id: "4",
+    id: 4,
     name: "David Wilson",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2480,
     eventsAttended: 22,
     rank: 4,
-    badge: "Arts Enthusiast",
-    streak: 6,
     level: "Silver",
-    joinedDate: "2024-03-10",
-    recentActivity: "Community Art Mural Project",
+
   },
   {
-    id: "5",
+    id: 5,
     name: "Lisa Brown",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2350,
     eventsAttended: 21,
     rank: 5,
-    badge: "Volunteer Spirit",
-    streak: 9,
     level: "Silver",
-    joinedDate: "2024-02-20",
-    recentActivity: "Senior Center Reading Program",
+
   },
   {
-    id: "6",
+    id: 6,
     name: "John Smith",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 2180,
     eventsAttended: 19,
     rank: 6,
-    badge: "Green Warrior",
-    streak: 4,
     level: "Silver",
-    joinedDate: "2024-03-05",
-    recentActivity: "Community Garden Cleanup",
+
   },
   {
-    id: "7",
+    id: 7,
     name: "Alex Rodriguez",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 1950,
     eventsAttended: 17,
     rank: 7,
-    badge: "Rising Star",
-    streak: 7,
     level: "Bronze",
-    joinedDate: "2024-04-12",
-    recentActivity: "Beach Cleanup Drive",
+
   },
   {
-    id: "8",
+    id: 8,
     name: "Maria Garcia",
     avatar: "/placeholder.svg?height=40&width=40",
     points: 1820,
     eventsAttended: 16,
     rank: 8,
-    badge: "Community Builder",
-    streak: 3,
     level: "Bronze",
-    joinedDate: "2024-04-25",
-    recentActivity: "Food Bank Volunteer Day",
   },
 ]
 
 export function UserLeaderboard() {
   const [timeFilter, setTimeFilter] = useState("all-time")
   const [categoryFilter, setCategoryFilter] = useState("all")
+
+  const [leaderboard, setLeaderboard] = useState<UserFormat[]|undefined>(mockLeaderboardData);  
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -243,15 +230,8 @@ export function UserLeaderboard() {
                       <Calendar className="h-4 w-4 text-sky-600" />
                       <span>{user.eventsAttended} events</span>
                     </div>
-                    <div className="flex items-center justify-center gap-1">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                      <span>{user.streak} day streak</span>
-                    </div>
-                  </div>
 
-                  <Badge variant="outline" className="mt-3 text-xs">
-                    {user.badge}
-                  </Badge>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -306,14 +286,9 @@ export function UserLeaderboard() {
                           <Calendar className="h-3 w-3" />
                           {user.eventsAttended} events
                         </span>
-                        <span className="flex items-center gap-1">
-                          <TrendingUp className="h-3 w-3" />
-                          {user.streak} day streak
-                        </span>
+
                       </div>
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {user.badge}
-                      </Badge>
+
                     </div>
                   </div>
                 </div>

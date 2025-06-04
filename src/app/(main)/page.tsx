@@ -35,9 +35,11 @@ export default function Page() {
       <div className="w-full relative">
         <div className="absolute inset-0 w-full h-full">
           <div className="absolute inset-0 bg-black/60 z-10"></div>
-          <img
-            src="https://images.unsplash.com/photo-1706806595136-5afefb45da1a?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          <Image
+            src="/images/mainhero.avif"
             alt="Background image"
+            width={screen.width}
+            height={screen.height}
             className="w-full h-full object-cover"
           />
         </div>
