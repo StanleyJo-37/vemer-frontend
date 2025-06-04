@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, DollarSign, Users, User, Star, Award } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-interface ActivityCardEnhancedProps {
+interface ActivityCardProps {
   id?: string
   title: string
   images: string[]
@@ -28,7 +28,7 @@ interface ActivityCardEnhancedProps {
   }
 }
 
-export function ActivityCardEnhanced({
+export function ActivityCard({
   id,
   title,
   images,
@@ -43,7 +43,7 @@ export function ActivityCardEnhanced({
   currentParticipants,
   points = 0,
   badge,
-}: ActivityCardEnhancedProps) {
+}: ActivityCardProps) {
   const router = useRouter()
 
   const handleViewDetails = () => {
