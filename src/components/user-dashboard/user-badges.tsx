@@ -1,9 +1,12 @@
 "use client"
 
+import type React from "react"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Award, Star, Heart, ArrowRight, Lock } from "lucide-react"
+import { Award, Star, Heart, ArrowRight, Lock, HeartOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 const userBadges = [
@@ -41,7 +44,7 @@ const userBadges = [
     earnedAt: "2025-06-10T08:00:00Z",
     rarity: "Uncommon",
     progress: 100,
-    isFavorite: true,
+    isFavorite: false,
   },
   {
     id: "badge4",
@@ -53,23 +56,10 @@ const userBadges = [
     earnedAt: "2025-06-12T16:45:00Z",
     rarity: "Epic",
     progress: 100,
-    isFavorite: true,
-  },
-  {
-    id: "badge5",
-    name: "Streak Master",
-    description: "Maintain a 30-day activity streak",
-    icon: "🔥",
-    category: "Achievement",
-    earned: false,
-    earnedAt: null,
-    rarity: "Legendary",
-    progress: 13,
-    maxProgress: 30,
     isFavorite: false,
   },
   {
-    id: "badge6",
+    id: "badge5",
     name: "Education Champion",
     description: "Lead 5 educational workshops",
     icon: "📚",
@@ -81,75 +71,102 @@ const userBadges = [
     maxProgress: 5,
     isFavorite: false,
   },
+  {
+    id: "badge6",
+    name: "Art Enthusiast",
+    description: "Participated in 3 arts & culture events",
+    icon: "🎨",
+    category: "Arts & Culture",
+    earned: false,
+    earnedAt: null,
+    rarity: "Uncommon",
+    progress: 1,
+    maxProgress: 3,
+    isFavorite: true,
+  },
 ]
 
 export function UserBadges() {
   const router = useRouter()
+  const [badges, setBadges] = useState(userBadges)
 
-  const favoriteBadges = userBadges.filter((badge) => badge.isFavorite)
-  const earnedBadges = userBadges.filter((badge) => badge.earned)
+  const earnedBadges = badges.filter((badge) => badge.earned)
 
   const handleViewAllBadges = () => {
     router.push("/user-dashboard/badges")
   }
 
+  const toggleFavorite = (badgeId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setBadges(badges.map((badge) => (badge.id === badgeId ? { ...badge, isFavorite: !badge.isFavorite } : badge)))
+  }
+
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case "Common":
-        return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
+        return "bg-gray-100 text-gray-800 border-gray-200"
       case "Uncommon":
-        return "bg-green-100 text-green-800 border-green-200 pointer-events-none transition-none hover:animate-none"
+        return "bg-green-100 text-green-800 border-green-200"
       case "Rare":
-        return "bg-blue-100 text-blue-800 border-blue-200 pointer-events-none transition-none hover:animate-none"
+        return "bg-blue-100 text-blue-800 border-blue-200"
       case "Epic":
-        return "bg-purple-100 text-purple-800 border-purple-200 pointer-events-none transition-none hover:animate-none"
+        return "bg-purple-100 text-purple-800 border-purple-200"
       case "Legendary":
-        return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300 pointer-events-none transition-none hover:animate-none"
+        return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
 
   return (
     <Card className="border-sky-100 h-full">
       <CardHeader className="bg-gradient-to-r from-sky-50 to-blue-50 border-b border-sky-100">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <CardTitle className="text-sky-900 flex items-center gap-2">
               <Award className="h-5 w-5 text-yellow-500" />
-              Favorite Badges
+              Your Badges
             </CardTitle>
             <CardDescription>
-              {earnedBadges.length} of {userBadges.length} badges earned
+              {earnedBadges.length} of {badges.length} badges earned
             </CardDescription>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleViewAllBadges}
-            className="border-sky-200 text-sky-700 hover:bg-sky-50"
+            className="border-sky-200 text-sky-700 hover:bg-sky-50 self-start sm:self-auto"
           >
             View All
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-2 gap-4">
-          {favoriteBadges.map((badge) => (
+      <CardContent className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {badges.map((badge) => (
             <div
               key={badge.id}
-              className={`relative p-4 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${
+              className={`relative p-3 sm:p-4 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${
                 badge.earned
                   ? "border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50"
                   : "border-gray-200 bg-gray-50 opacity-75"
               }`}
             >
-              {/* Favorite Star */}
+              {/* Favorite Toggle */}
               <div className="absolute -top-2 -right-2">
-                <div className="bg-yellow-500 rounded-full p-1">
-                  <Heart className="h-3 w-3 text-white fill-current" />
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 bg-white rounded-full shadow-sm border"
+                  onClick={(e) => toggleFavorite(badge.id, e)}
+                >
+                  {badge.isFavorite ? (
+                    <Heart className="h-3 w-3 text-red-500 fill-current" />
+                  ) : (
+                    <HeartOff className="h-3 w-3 text-gray-400" />
+                  )}
+                </Button>
               </div>
 
               {/* Lock Icon for Unearned Badges */}
@@ -160,7 +177,7 @@ export function UserBadges() {
               )}
 
               <div className="text-center">
-                <div className="text-3xl mb-2 filter grayscale-0">{badge.icon}</div>
+                <div className="text-2xl sm:text-3xl mb-2 filter grayscale-0">{badge.icon}</div>
 
                 <h3 className={`font-semibold text-sm mb-1 ${badge.earned ? "text-gray-900" : "text-gray-500"}`}>
                   {badge.name}
@@ -195,31 +212,31 @@ export function UserBadges() {
         </div>
 
         {/* Progress Summary */}
-        <div className="mt-6 pt-4 border-t border-gray-100">
+        <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-100">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">Badge Collection Progress</span>
             <span className="font-semibold text-sky-600">
-              {earnedBadges.length}/{userBadges.length}
+              {earnedBadges.length}/{badges.length}
             </span>
           </div>
           <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-sky-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${(earnedBadges.length / userBadges.length) * 100}%` }}
+              style={{ width: `${(earnedBadges.length / badges.length) * 100}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">{userBadges.length - earnedBadges.length} more badges to unlock</p>
+          <p className="text-xs text-gray-500 mt-1">{badges.length - earnedBadges.length} more badges to unlock</p>
         </div>
 
         {/* Next Badge to Earn */}
-        {userBadges.filter((b) => !b.earned).length > 0 && (
+        {badges.filter((b) => !b.earned).length > 0 && (
           <div className="mt-4 p-3 bg-sky-50 border border-sky-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Star className="h-4 w-4 text-sky-600" />
               <span className="text-sm font-medium text-sky-900">Next Badge Goal</span>
             </div>
             {(() => {
-              const nextBadge = userBadges.find((b) => !b.earned)
+              const nextBadge = badges.find((b) => !b.earned)
               return nextBadge ? (
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{nextBadge.icon}</span>

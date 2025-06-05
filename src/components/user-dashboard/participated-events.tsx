@@ -74,7 +74,7 @@ export function ParticipatedEvents() {
   return (
     <Card className="border-sky-100 h-full">
       <CardHeader className="bg-gradient-to-r from-sky-50 to-blue-50 border-b border-sky-100">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <CardTitle className="text-sky-900 flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -86,38 +86,38 @@ export function ParticipatedEvents() {
             variant="outline"
             size="sm"
             onClick={handleViewAllHistory}
-            className="border-sky-200 text-sky-700 hover:bg-sky-50"
+            className="border-sky-200 text-sky-700 hover:bg-sky-50 self-start sm:self-auto"
           >
             View History
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-4 sm:p-6">
+        <div className="space-y-3 sm:space-y-4">
           {participatedEvents.map((event) => (
             <div
               key={event.id}
-              className="p-4 border border-gray-200 rounded-lg hover:border-sky-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+              className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:border-sky-200 hover:shadow-md transition-all duration-200 cursor-pointer"
               onClick={() => handleViewEvent(event.id)}
             >
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="flex-shrink-0">
                   <img
                     src={event.image || "/placeholder.svg"}
                     alt={event.title}
-                    className="w-20 h-16 object-cover rounded-lg"
+                    className="w-full sm:w-20 h-16 object-cover rounded-lg"
                   />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
                     <h3 className="font-semibold text-gray-900 line-clamp-1">{event.title}</h3>
-                    <div className="flex items-center gap-2 ml-2">
+                    <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-xs cursor-default">
                         {event.category}
                       </Badge>
-                      <Badge className="bg-green-100 text-green-800 border-green-200 text-xs cursor-default pointer-events-none transition-none hover:animate-none">
+                      <Badge className="bg-green-100 text-green-800 border-green-200 text-xs cursor-default">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Completed
                       </Badge>
@@ -145,12 +145,12 @@ export function ParticipatedEvents() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">Your rating:</span>
                       <div className="flex items-center gap-1">{renderStars(event.rating)}</div>
                     </div>
-                    <Badge className="bg-sky-100 text-sky-800 border-sky-200 text-xs cursor-default">
+                    <Badge className="bg-sky-100 text-sky-800 border-sky-200 text-xs cursor-default self-start">
                       +{event.pointsEarned} pts
                     </Badge>
                   </div>
@@ -167,8 +167,8 @@ export function ParticipatedEvents() {
         </div>
 
         {participatedEvents.length === 0 && (
-          <div className="text-center py-8">
-            <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <div className="text-center py-6 sm:py-8">
+            <CheckCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No completed events yet</h3>
             <p className="text-gray-600 mb-4">Start participating in community events to build your history!</p>
             <Button onClick={() => router.push("/activities")} className="bg-sky-600 hover:bg-sky-700">

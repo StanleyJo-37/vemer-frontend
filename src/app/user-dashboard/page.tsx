@@ -52,42 +52,42 @@ export default function UserDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-8">
+      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-6">
         {/* Header */}
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, John!</h1>
           <p className="text-gray-600 mt-2">Here's what's happening in your community</p>
         </motion.div>
 
-        {/* Top Row - Stats and Upcoming Events */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div variants={itemVariants} className="lg:col-span-1">
-            <UserStats />
-          </motion.div>
-          <motion.div variants={itemVariants} className="lg:col-span-2">
-            <UpcomingEvents />
-          </motion.div>
-        </div>
+        {/* User Stats - Full Width */}
+        <motion.div variants={itemVariants}>
+          <UserStats />
+        </motion.div>
 
-        {/* Second Row - Announcements and Recommendations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div variants={itemVariants}>
-            <RecentAnnouncements newCount={newNotificationsCount} />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <EventRecommendations />
-          </motion.div>
-        </div>
+        {/* Upcoming Events - Full Width */}
+        <motion.div variants={itemVariants}>
+          <UpcomingEvents />
+        </motion.div>
 
-        {/* Third Row - Participated Events and Badges */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div variants={itemVariants} className="lg:col-span-2">
-            <ParticipatedEvents />
-          </motion.div>
-          <motion.div variants={itemVariants} className="lg:col-span-1">
-            <UserBadges />
-          </motion.div>
-        </div>
+        {/* Recent Announcements - Full Width */}
+        <motion.div variants={itemVariants}>
+          <RecentAnnouncements newCount={newNotificationsCount} />
+        </motion.div>
+
+        {/* Event Recommendations - Full Width */}
+        <motion.div variants={itemVariants}>
+          <EventRecommendations />
+        </motion.div>
+
+        {/* Participated Events - Full Width */}
+        <motion.div variants={itemVariants}>
+          <ParticipatedEvents />
+        </motion.div>
+
+        {/* User Badges - Full Width */}
+        <motion.div variants={itemVariants}>
+          <UserBadges />
+        </motion.div>
       </motion.div>
     </div>
   )
