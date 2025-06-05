@@ -129,33 +129,34 @@ export function UserLeaderboard() {
 
   const loadLeaderboard = useCallback(async () => {
 
-    try {
-      const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
-      setLeaderboard(data);
-    } catch (e) {
-      console.error("Failed to load leaderboard:", e);
-    }
+    // try {
+    //   const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
+    //   setLeaderboard(data);
+    // } catch (e) {
+    //   console.error("Failed to load leaderboard:", e);
+    // }
 
     try {
-      const active = await LeaderboardAPI.getTotalActiveUser(categoryFilter);
-      setTotalActiveUser(active);
+      const response = await LeaderboardAPI.getTotalActiveUser(categoryFilter);
+      const data = response.data;
+      setTotalActiveUser(data)
     } catch (e) {
       console.error("Failed to load total active user:", e);
     }
 
-    try {
-      const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
-      setTotalPointsEarned(point);
-    } catch (e) {
-      console.error("Failed to load total points earned:", e);
-    }
+    // try {
+    //   const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
+    //   setTotalPointsEarned(point);
+    // } catch (e) {
+    //   console.error("Failed to load total points earned:", e);
+    // }
 
-    try {
-      const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
-      setTotalEventsCompleted(event);
-    } catch (e) {
-      console.error("Failed to load total events completed:", e);
-    }
+    // try {
+    //   const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
+    //   setTotalEventsCompleted(event);
+    // } catch (e) {
+    //   console.error("Failed to load total events completed:", e);
+    // }
   }, [categoryFilter]);
 
 

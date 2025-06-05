@@ -3,7 +3,7 @@ import { UserFormat } from "@/components/leaderboard";
 
 const LeaderboardAPI = {
     getLeaderboard: async (category:string):Promise<UserFormat[]> => {
-        return API.AuthenticatedAPI.request({
+        return API.PublicAPI.request({
             url: '/leaderboard/user',
             method: 'GET',
             params: {
@@ -12,18 +12,17 @@ const LeaderboardAPI = {
         });
     },
     
-    getTotalActiveUser: async (category:string):Promise<number> => {
-        return API.AuthenticatedAPI.request({
+    getTotalActiveUser: async (category: string): Promise<{ data: number }> => {
+        return API.PublicAPI.request({
             url: '/leaderboard/total-user',
             method: 'GET',
-            params: {
-                category
-            },
-        });
-    },
+            params: { category },
+    });
+},
+
 
     getTotalPointsEarned: async (category:string):Promise<number> => {
-        return API.AuthenticatedAPI.request({
+        return API.PublicAPI.request({
             url: '/leaderboard/total-points',
             method: 'GET',
             params: {
@@ -33,7 +32,7 @@ const LeaderboardAPI = {
     },
 
     getTotalEventsCompleted: async (category:string):Promise<number> => {
-        return API.AuthenticatedAPI.request({
+        return API.PublicAPI.request({
             url: '/leaderboard/total-points',
             method: 'GET',
             params: {
