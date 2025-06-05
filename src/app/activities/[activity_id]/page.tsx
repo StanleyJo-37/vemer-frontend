@@ -21,7 +21,7 @@ import {
 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
-// Updated mock data with simplified join popup configurations
+// Updated mock data with all events free and simplified join popup
 const mockActivities = [
   {
     id: "1",
@@ -145,10 +145,10 @@ const mockActivities = [
     image: "/placeholder.svg?height=400&width=600",
     date: "2025-07-08",
     location: "Tech Innovation Hub",
-    price: "25",
+    price: "0",
     category: "Education",
     organizer: "Code for Tomorrow",
-    isFree: false,
+    isFree: true,
     maxParticipants: 20,
     currentParticipants: 15,
     points: 300,
@@ -216,17 +216,17 @@ const parseBenefits = (benefits: string): string[] => {
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
     case "Common":
-      return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
+      return "bg-gray-100 text-gray-800 border-gray-200"
     case "Uncommon":
-      return "bg-green-100 text-green-800 border-green-200 pointer-events-none transition-none hover:animate-none"
+      return "bg-green-100 text-green-800 border-green-200"
     case "Rare":
-      return "bg-sky-100 text-sky-800 border-sky-200 pointer-events-none transition-none hover:animate-none"
+      return "bg-sky-100 text-sky-800 border-sky-200"
     case "Epic":
-      return "bg-purple-100 text-purple-800 border-purple-200 pointer-events-none transition-none hover:animate-none"
+      return "bg-purple-100 text-purple-800 border-purple-200"
     case "Legendary":
-      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300 pointer-events-none transition-none hover:animate-none"
+      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200 pointer-events-none transition-none hover:animate-none"
+      return "bg-gray-100 text-gray-800 border-gray-200"
   }
 }
 
@@ -288,22 +288,6 @@ export default function ActivityDetailsPage() {
     }
   }
 
-  const formatPrice = () => {
-    if (!activity) return "Free"
-    if (activity.isFree || activity.price === "Free" || activity.price === "0") {
-      return "Free"
-    }
-    return `$${activity.price}`
-  }
-
-  const getPriceColor = () => {
-    if (!activity) return "text-green-600"
-    if (activity.isFree || activity.price === "Free" || activity.price === "0") {
-      return "text-green-600"
-    }
-    return "text-sky-600"
-  }
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -336,17 +320,17 @@ export default function ActivityDetailsPage() {
   const benefitsList = activity.benefits ? parseBenefits(activity.benefits) : []
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="mb-4 sm:mb-6">
         <Button variant="ghost" onClick={() => router.back()} className="mb-4 hover:bg-sky-50">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Hero Image */}
           <div className="aspect-video rounded-lg overflow-hidden">
             <img
@@ -358,30 +342,35 @@ export default function ActivityDetailsPage() {
 
           {/* Activity Info */}
           <div>
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{activity.title}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{activity.title}</h1>
                 <Badge variant="secondary" className="mb-4 bg-sky-100 text-sky-800">
                   {activity.category}
                 </Badge>
               </div>
-              <Button variant="outline" size="sm" onClick={handleShare} className="border-sky-200 hover:bg-sky-50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="border-sky-200 hover:bg-sky-50 self-start"
+              >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* About This Event */}
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">About This Event</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">About This Event</h2>
                 <p className="text-gray-700 leading-relaxed">{activity.description}</p>
               </div>
 
               {/* What Will You Get */}
               {benefitsList.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">What Will You Get?</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">What Will You Get?</h2>
                   <ul className="space-y-2">
                     {benefitsList.map((benefit, index) => (
                       <li key={index} className="flex items-start gap-3">
@@ -395,7 +384,7 @@ export default function ActivityDetailsPage() {
 
               {/* Rewards Section */}
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Event Rewards</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Event Rewards</h2>
                 <div className="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-lg p-4">
                   <div className="space-y-3">
                     {/* Points */}
@@ -454,15 +443,15 @@ export default function ActivityDetailsPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Join Card */}
           <Card className="border-sky-200">
             <CardHeader>
-              <CardTitle className="text-xl text-sky-900">Join This Activity</CardTitle>
+              <CardTitle className="text-lg sm:text-xl text-sky-900">Join This Activity</CardTitle>
               <CardDescription>Be part of making a positive impact in your community</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`text-3xl font-bold ${getPriceColor()}`}>{formatPrice()}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">Free</div>
 
               <Button
                 className={`w-full ${isJoined ? "bg-sky-100 text-sky-700 border-sky-200" : "bg-sky-600 hover:bg-sky-700"}`}
@@ -529,7 +518,7 @@ export default function ActivityDetailsPage() {
               <div className="flex items-center gap-3">
                 <DollarSign className="h-5 w-5 text-sky-600" />
                 <div>
-                  <p className={`font-medium ${getPriceColor()}`}>{formatPrice()}</p>
+                  <p className="font-medium text-green-600">Free</p>
                   <p className="text-sm text-gray-600">Price</p>
                 </div>
               </div>
