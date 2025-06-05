@@ -1,6 +1,6 @@
 const API_URL: {local: string, prod: string} = {
-    local: "localhost:8000/api",
-    prod: "localhost:8000/api",
+    local: "127.0.0.1:8000/api",
+    prod: "127.0.0.1:8000/api",
 }
 
 export default API_URL;

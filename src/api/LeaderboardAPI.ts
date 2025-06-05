@@ -1,7 +1,6 @@
 import API from "./axios";
 import { UserFormat } from "@/components/leaderboard";
 
-
 const LeaderboardAPI = {
     getLeaderboard: async (category:string):Promise<UserFormat[]> => {
         return API.AuthenticatedAPI.request({

@@ -1,8 +1,5 @@
-"use server";
 import Axios from "axios";
 import API_URL from ".";
-import { cookies } from "next/headers";
-
 
 const PublicAPI = Axios.create({
     baseURL: API_URL.local + '/public',
@@ -31,14 +28,15 @@ PublicAPI.interceptors.response.use(
 );
 
 AuthenticatedAPI.interceptors.request.use(
-    async (config) => {
-        const token = cookies().get("vemer_token");
-        if (token) {
-            if (config.headers) {
-                config.headers['Authorization'] = `BEARER ${token}`;
-            }
-        }
-        return config;
+    async (request) => {
+        // const token = cookies().get("vemer_token");
+        // if (token) {
+        //     if (config.headers) {
+        //         config.headers['Authorization'] = `BEARER ${token}`;
+        //     }
+        // }
+        // return config;
+        return request;
     },
     async (error) => {
         return Promise.reject(error);
@@ -48,6 +46,6 @@ AuthenticatedAPI.interceptors.request.use(
 const API = {
     AuthenticatedAPI,
     PublicAPI,
-}
+};
 
 export default API;

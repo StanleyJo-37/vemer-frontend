@@ -32,19 +32,10 @@ export function DashboardStats() {
       bgColor: "bg-purple-50",
       borderColor: "border-purple-100",
     },
-    {
-      title: "Engagement Rate",
-      value: "87%",
-      change: "+3% this month",
-      icon: TrendingUp,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-100",
-    },
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
       {stats.map((stat) => (
         <Card key={stat.title} className={`${stat.borderColor} hover:shadow-md transition-shadow`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

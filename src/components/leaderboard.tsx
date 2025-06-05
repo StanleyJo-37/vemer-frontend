@@ -128,14 +128,34 @@ export function UserLeaderboard() {
     useState<UserFormat[]>(mockLeaderboardData);
 
   const loadLeaderboard = useCallback(async () => {
-    const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
-    setLeaderboard(data);
-    const active = await LeaderboardAPI.getTotalActiveUser(categoryFilter);
-    setTotalActiveUser(active);
-    const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
-    setTotalPointsEarned(point);
-    const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
-    setTotalEventsCompleted(event);
+
+    try {
+      const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
+      setLeaderboard(data);
+    } catch (e) {
+      console.error("Failed to load leaderboard:", e);
+    }
+
+    try {
+      const active = await LeaderboardAPI.getTotalActiveUser(categoryFilter);
+      setTotalActiveUser(active);
+    } catch (e) {
+      console.error("Failed to load total active user:", e);
+    }
+
+    try {
+      const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
+      setTotalPointsEarned(point);
+    } catch (e) {
+      console.error("Failed to load total points earned:", e);
+    }
+
+    try {
+      const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
+      setTotalEventsCompleted(event);
+    } catch (e) {
+      console.error("Failed to load total events completed:", e);
+    }
   }, [categoryFilter]);
 
 
