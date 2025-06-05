@@ -23,7 +23,7 @@ export type RoleType = NavbarProps['role']
 export const Navbar = () => {
 
   const user = useAuth();
-  const role:RoleType = !user.isAuthenticated ? "publisher" : (user.user?.is_publisher ? "publisher" : "user");
+  const role:RoleType = !user.isAuthenticated ? "unregistered" : (user.user?.is_publisher ? "publisher" : "user");
 
   const navItems = [
     {

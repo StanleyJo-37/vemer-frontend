@@ -1,8 +1,9 @@
 import API from "./axios";
+import { UserFormat } from "@/components/leaderboard";
 
 
 const LeaderboardAPI = {
-    getLeaderboard: async (category:string) => {
+    getLeaderboard: async (category:string):Promise<UserFormat[]> => {
         return API.AuthenticatedAPI.request({
             url: '/leaderboard/user',
             method: 'GET',
@@ -12,7 +13,7 @@ const LeaderboardAPI = {
         });
     },
     
-    getTotalActiveUser: async (category:string) => {
+    getTotalActiveUser: async (category:string):Promise<number> => {
         return API.AuthenticatedAPI.request({
             url: '/leaderboard/total-user',
             method: 'GET',
@@ -22,7 +23,7 @@ const LeaderboardAPI = {
         });
     },
 
-    getTotalPointsEarned: async (category:string) => {
+    getTotalPointsEarned: async (category:string):Promise<number> => {
         return API.AuthenticatedAPI.request({
             url: '/leaderboard/total-points',
             method: 'GET',
@@ -32,7 +33,7 @@ const LeaderboardAPI = {
         });
     },
 
-    getTotalEventsCompleted: async (category:string) => {
+    getTotalEventsCompleted: async (category:string):Promise<number> => {
         return API.AuthenticatedAPI.request({
             url: '/leaderboard/total-points',
             method: 'GET',
