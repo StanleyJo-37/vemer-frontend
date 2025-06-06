@@ -4,6 +4,7 @@ export interface UserType {
   id: number;
   email: string;
   name: string;
+  username: string;
   profile_photo_path: string;
   role: RoleType;
   is_publisher: boolean;

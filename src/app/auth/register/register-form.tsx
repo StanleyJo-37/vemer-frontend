@@ -36,6 +36,8 @@ import LoadingSpinner from "@/components/loading-spinner";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import PasswordErrors from "@/components/password-errors";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const RegisterFormSchema = z
   .object({
@@ -83,6 +85,7 @@ const RegisterFormSchema = z
     "toc-accept": z.boolean().refine((val) => val, {
       message: "You have to agree to our license agreement.",
     }),
+    is_publisher: z.boolean().optional(),
   })
   .superRefine(({ confirmPassword, password }, ctx) => {
     if (confirmPassword !== password) {
@@ -115,6 +118,7 @@ export function SignupForm() {
       username: "",
       password: "",
       "toc-accept": false,
+      is_publisher: false,
     },
   });
 
@@ -125,7 +129,11 @@ export function SignupForm() {
 
     const ssoLogin = async () => {
       try {
-        const resp = await AuthAPI.loginSSO(ssoProvider, pathname, "/user-dashboard");
+        const resp = await AuthAPI.loginSSO(
+          ssoProvider,
+          pathname,
+          "/user-dashboard"
+        );
 
         const popup = window.open(
           resp.data.redirect_url as string,
@@ -162,7 +170,9 @@ export function SignupForm() {
     setIsSubmitLoading(true);
 
     try {
-      const payload: RegisterPayload = omit(data, "toc_accept");
+      console.log(data.is_publisher);
+      const payload: RegisterPayload = omit(data, "toc-accept");
+      console.log(payload);
 
       const resp = await AuthAPI.register(payload);
 
@@ -171,7 +181,7 @@ export function SignupForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      router.push("/auth/profile-completion");
+      router.push("/auth/login");
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
@@ -334,7 +344,29 @@ export function SignupForm() {
                     />
                   </div>
                 </div>
-
+                <FormField
+                  disabled={isSubmitLoading}
+                  control={form.control}
+                  name="is_publisher"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2 pt-2 mb-5">
+                      <Switch
+                        id="publisher-mode"
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked)}
+                        disabled={field.disabled}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                      <Label
+                        htmlFor="publisher-mode"
+                        className="cursor-pointer"
+                      >
+                        Register as a Publisher
+                      </Label>
+                    </div>
+                  )}
+                />
                 <FormField
                   disabled={isSubmitLoading}
                   control={form.control}
@@ -353,7 +385,7 @@ export function SignupForm() {
                               ref={field.ref}
                             />
                           </FormControl>
-                          <FormLabel className="!mt-0" htmlFor="toc_accept">
+                          <FormLabel className="!mt-0" htmlFor="toc-accept">
                             I agree to{" "}
                             <span
                               onClick={() => setIsTocAcceptDialogOpen(true)}

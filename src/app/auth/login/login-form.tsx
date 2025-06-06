@@ -104,9 +104,15 @@ export default function LoginForm() {
 
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
-
+      
+      if (respData.is_publisher) {
+        router.push("/publisher-dashboard")
+      } else {
+        router.push("/user-dashboard")
+      }
       if (!respData.profile_completion) {
-        router.push("/auth/profile-completion");
+        // router.push("/auth/profile-completion");
+        // router.push("/publisher-dashboard")
       }
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
