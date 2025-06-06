@@ -1,4 +1,4 @@
-export type RoleType = "user" | "publisher";
+export type RoleType = "volunteer" | "publisher";
 
 export interface UserType {
   id: number;

@@ -41,7 +41,7 @@ export const Navbar = () => {
     {
       name: "Dashboard",
       link:
-        user?.role === "user"
+        user?.role === "volunteer"
           ? "/user-dashboard"
           : user?.role === "publisher"
           ? "/publisher-dashboard"
