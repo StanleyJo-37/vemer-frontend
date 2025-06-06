@@ -6,7 +6,7 @@ import type { SocialiteProvider } from "@/types/AuthType";
 import { Airplay, Linkedin } from "lucide-react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -24,26 +24,13 @@ import LucideIcon from "@/components/lucide-icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import sso from "@/constants/sso";
 
 const LoginFormSchema = z.object({
   email: z.string().email().min(1, { message: "Email wajib diisi." }),
   password: z.string().min(1, { message: "Password wajib diisi." }),
   remember_me: z.boolean(),
 });
-
-const sso: {
-  label: string;
-  provider: SocialiteProvider;
-}[] = [
-  {
-    label: "Google",
-    provider: "google",
-  },
-  {
-    label: "LinkedIn",
-    provider: "linkedin-openid",
-  },
-];
 
 // type LoginPayload = Omit<z.infer<typeof LoginFormSchema>, 'toc-accept'>;
 
@@ -63,14 +50,41 @@ export default function LoginForm() {
     },
   });
 
+  const pathname = usePathname();
+
   useEffect(() => {
     if (!ssoProvider) return;
 
     const ssoLogin = async () => {
       try {
-        const resp = await AuthAPI.loginSSO(ssoProvider, "", "");
+        const resp = await AuthAPI.loginSSO(
+          ssoProvider,
+          pathname,
+          "/user-dashboard"
+        );
+
+        const popup = window.open(
+          resp.data.redirect_url as string,
+          "sso-popup",
+          "width=500,height=600"
+        );
+
+        const listener = (event: MessageEvent) => {
+          const { user, targetPath } = event.data;
+
+          localStorage.removeItem("user");
+          localStorage.setItem("user", JSON.stringify(user as UserType));
+
+          window.removeEventListener("message", listener);
+
+          router.push(targetPath || "/dashboard");
+          popup?.close();
+        };
+
+        window.addEventListener("message", listener);
       } catch (err) {
         if (err instanceof AxiosError) {
+          toast(err.response?.data.message || err.message);
         }
       } finally {
         setSsoProvider(undefined);
@@ -91,9 +105,9 @@ export default function LoginForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      router.push(
-        respData.profile.completion === 1 ? "" : "/auth/profile-completion"
-      );
+      if (!respData.profile_completion) {
+        router.push("/auth/profile-completion");
+      }
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
     } finally {
@@ -108,12 +122,11 @@ export default function LoginForm() {
         <CardContent className="shadow-input mx-auto w-full rounded-md max-w-md bg-white px-10 pt-10 pb-4 dark:bg-black">
           <Form {...form}>
             <div>
-              <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+              <h2 className="text-3xl mb-4 font-bold text-neutral-800 dark:text-neutral-200">
                 Welcome Back to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Login to Vemer if you can because we don&apos;t have a login
-                flow yet
+                Start giving back to the community with Vemer.
               </p>
 
               <form className="my-8" onSubmit={form.handleSubmit(onSubmit)}>
@@ -167,46 +180,53 @@ export default function LoginForm() {
                     control={form.control}
                     name="remember_me"
                     render={({ field }) => (
-                        <FormItem className="flex flex-row items-center py-2 px-1 space-x-4">
-                            <Checkbox
-                                disabled={isSubmitLoading}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
-                            <FormLabel className="!mt-0" htmlFor="remember_me">Ingat Saya</FormLabel>
-                        </FormItem>
+                      <FormItem className="flex flex-row items-center py-2 px-1 space-x-4">
+                        <Checkbox
+                          disabled={isSubmitLoading}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                        <FormLabel className="!mt-0" htmlFor="remember_me">
+                          Ingat Saya
+                        </FormLabel>
+                      </FormItem>
                     )}
-                />
+                  />
                 </div>
-                
+
                 <Button
-                  className="group/btn relative block mt-5 h-10 w-full rounded-md bg-gradient-to-br font-medium bg-sky-500 hover:bg-sky-600 text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+                  className="group/btn flex flex-row items-center relative mt-5 h-10 w-full rounded-md bg-gradient-to-br font-medium bg-sky-500 hover:bg-sky-600 text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
                   type="submit"
                 >
-                  Sign up &rarr;
+                  <p>Sign In</p>
+                  <p>&rarr;</p>
                 </Button>
 
                 <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
-                <div className="flex flex-row justify-center items-center gap-5">
-                  {sso.map((_sso, idx) => (
-                    <Button
-                      variant={"outline"}
-                      className="group/btn relative block text-black text-sm h-10 w-full hover:bg-sky-100 rounded-md flex justify-center items-center font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
-                      key={idx}
-                      onClick={() => setSsoProvider(_sso.provider)}
-                      type="button"
-                    >
-                      <div className="flex flex-row items-center justify-content gap-4">
-                        {idx === 0 ? (
-                          <Airplay size={18} />
-                        ) : (
-                          <Linkedin size={18} />
-                        )}
-                        {_sso.label}
-                      </div>
-                    </Button>
-                  ))}
+                <div className="flex flex-col items-center justify-center">
+                  <p className="text-lg mb-4">Or continue with:</p>
+                  <div className="flex flex-row justify-center items-center gap-5">
+                    {sso.map((_ssoProvider, idx) => (
+                      <Button
+                        variant="outline"
+                        className="group/btn relative text-black text-sm h-10 w-full hover:bg-sky-100 rounded-md flex justify-center items-center font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+                        key={idx}
+                        onClick={() => setSsoProvider(_ssoProvider.provider)}
+                        type="button"
+                        disabled={_ssoProvider.provider === ssoProvider}
+                      >
+                        <div className="flex flex-row items-center justify-content gap-4">
+                          {idx === 0 ? (
+                            <LucideIcon icon="Mail" size={18} />
+                          ) : (
+                            <LucideIcon icon="Linkedin" size={18} />
+                          )}
+                          <p>{_ssoProvider.label}</p>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </form>
             </div>

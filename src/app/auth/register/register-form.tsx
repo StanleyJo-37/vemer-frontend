@@ -6,7 +6,7 @@ import type { SocialiteProvider } from "@/types/AuthType";
 import { Airplay, Linkedin } from "lucide-react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -15,6 +15,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import {
@@ -30,50 +31,78 @@ import { UserType } from "@/types/UserType";
 import LucideIcon from "@/components/lucide-icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import sso from "@/constants/sso";
+import LoadingSpinner from "@/components/loading-spinner";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import PasswordErrors from "@/components/password-errors";
 
 const RegisterFormSchema = z
   .object({
     email: z.string().email().min(1, { message: "Email wajib diisi." }),
-    username: z.string().min(1, { message: "Username wajib diisi." }),
-    password: z.string().min(1, { message: "Password wajib diisi." }),
+    username: z
+      .string()
+      .min(8, { message: "Username must contain at least 8 characters." })
+      .max(24, { message: "Username must contain at most 24 characters." }),
+    name: z
+      .string()
+      .min(8, { message: "Name must contain at least 8 characters." }),
+    password: z.string().superRefine((password, ctx) => {
+      let containsNumeric = false;
+      let containsUpperAlphabet = false;
+      let containsLowerAlphabet = false;
+      let containsSymbol = false;
+
+      const issues = [];
+
+      for (let i = 0; i < password.length; ++i) {
+        const c = password.charAt(i);
+        if (c >= "0" && c <= "9") containsNumeric = true;
+        else if (c >= "A" && c <= "Z") containsUpperAlphabet = true;
+        else if (c >= "a" && c <= "z") containsLowerAlphabet = true;
+        else containsSymbol = true;
+      }
+
+      if (password.length < 8) issues.push("at least contains 8 characters.");
+      if (!containsNumeric) issues.push("at least one number");
+      if (!containsUpperAlphabet) issues.push("at least one uppercase letter");
+      if (!containsLowerAlphabet) issues.push("at least one lowercase letter");
+      if (!containsSymbol) issues.push("at least one symbol");
+
+      if (issues.length > 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: issues.join("|"),
+          path: ["password"],
+        });
+      }
+    }),
     confirmPassword: z
       .string()
-      .min(1, { message: "Confirm Password wajib diisi." }),
+      .min(1, { message: "Type in the password again." }),
     "toc-accept": z.boolean().refine((val) => val, {
-      message: "Anda harus menyetujui syarat penggunaan Vemer.",
+      message: "You have to agree to our license agreement.",
     }),
   })
   .superRefine(({ confirmPassword, password }, ctx) => {
     if (confirmPassword !== password) {
       ctx.addIssue({
         code: "custom",
-        message: "The passwords did not match",
+        message: "Password does not match",
         path: ["confirmPassword"],
       });
     }
   });
 
-const sso: {
-  label: string;
-  provider: SocialiteProvider;
-}[] = [
-  {
-    label: "Google",
-    provider: "google",
-  },
-  {
-    label: "LinkedIn",
-    provider: "linkedin-openid",
-  },
-];
-
 type RegisterPayload = Omit<z.infer<typeof RegisterFormSchema>, "toc-accept">;
 
 export function SignupForm() {
   const [isPasswordShown, setIsPasswordShown] = useState<boolean>(false);
-  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState<boolean>(false);
+  const [isConfirmPasswordShown, setIsConfirmPasswordShown] =
+    useState<boolean>(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
-  const [isTocAcceptDialogOpen, setIsTocAcceptDialogOpen] = useState<boolean>(false);
+  const [isTocAcceptDialogOpen, setIsTocAcceptDialogOpen] =
+    useState<boolean>(false);
   const [ssoProvider, setSsoProvider] = useState<SocialiteProvider>();
 
   const router = useRouter();
@@ -82,20 +111,44 @@ export function SignupForm() {
     resolver: zodResolver(RegisterFormSchema),
     defaultValues: {
       email: "",
+      name: "",
       username: "",
       password: "",
       "toc-accept": false,
     },
   });
 
+  const pathname = usePathname();
+
   useEffect(() => {
     if (!ssoProvider) return;
 
     const ssoLogin = async () => {
       try {
-        const resp = await AuthAPI.loginSSO(ssoProvider, "", "");
+        const resp = await AuthAPI.loginSSO(ssoProvider, pathname, "/user-dashboard");
+
+        const popup = window.open(
+          resp.data.redirect_url as string,
+          "sso-popup",
+          "width=500,height=600"
+        );
+
+        const listener = (event: MessageEvent) => {
+          const { user, targetPath } = event.data;
+
+          localStorage.removeItem("user");
+          localStorage.setItem("user", JSON.stringify(user as UserType));
+
+          window.removeEventListener("message", listener);
+
+          router.push(targetPath || "/dashboard");
+          popup?.close();
+        };
+
+        window.addEventListener("message", listener);
       } catch (err) {
         if (err instanceof AxiosError) {
+          toast(err.response?.data.message || err.message);
         }
       } finally {
         setSsoProvider(undefined);
@@ -120,7 +173,9 @@ export function SignupForm() {
 
       router.push("/auth/profile-completion");
     } catch (err) {
-      toast("Terjadi kesalahan saat registrasi.");
+      if (err instanceof AxiosError) {
+        toast(err.response?.data.message || err.message);
+      }
     } finally {
       setIsSubmitLoading(false);
     }
@@ -146,115 +201,175 @@ export function SignupForm() {
                 </div>
               </Dialog>
 
-              <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+              <h2 className="text-3xl mb-4 font-bold text-neutral-800 dark:text-neutral-200">
                 Welcome to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Login to Vemer if you can because we don&apos;t have a login flow yet
+                Start giving back to the community with Vemer.
               </p>
 
               <form className="my-8" onSubmit={form.handleSubmit(handleSubmit)}>
-                <div className="mb-4 flex flex-col space-y-0 gap-2">
-                  <FormField
-                    disabled={isSubmitLoading}
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="username">Username</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Username"
-                            {...field}
-                            disabled={isSubmitLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    disabled={isSubmitLoading}
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="email">Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Email"
-                            {...field}
-                            disabled={isSubmitLoading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    disabled={isSubmitLoading}
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="password">Password</FormLabel>
-                        <FormControl>
-                          <div className="relative h-auto">
+                <div className="flex flex-row justify-center space-x-4">
+                  <div className="mb-4 flex flex-col space-y-0 gap-2">
+                    <FormField
+                      disabled={isSubmitLoading}
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="username">Username</FormLabel>
+                          <FormControl>
                             <Input
-                              type={isPasswordShown ? "text" : "password"}
-                              placeholder="Password"
+                              placeholder="Username"
                               {...field}
                               disabled={isSubmitLoading}
                             />
-                            <LucideIcon
-                              icon={isPasswordShown ? "EyeOff" : "Eye"}
-                              className="absolute right-4 top-[.9rem] cursor-pointer w-4 h-4"
-                              onClick={() => setIsPasswordShown((prev) => !prev)}
-                            />
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    disabled={isSubmitLoading}
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="confirmPassword">
-                          Confirm Password
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative h-auto">
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      disabled={isSubmitLoading}
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="name">Name</FormLabel>
+                          <FormControl>
                             <Input
-                              type={isConfirmPasswordShown ? "text" : "password"}
-                              placeholder="Confirm Password"
+                              placeholder="Name"
                               {...field}
                               disabled={isSubmitLoading}
                             />
-                            <LucideIcon
-                              icon={isConfirmPasswordShown ? "EyeOff" : "Eye"}
-                              className="absolute right-4 top-[.9rem] cursor-pointer w-4 h-4"
-                              onClick={() =>
-                                setIsConfirmPasswordShown((prev) => !prev)
-                              }
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      disabled={isSubmitLoading}
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="email">Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Email"
+                              {...field}
+                              disabled={isSubmitLoading}
                             />
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="mb-4 flex flex-col space-y-0 gap-2">
+                    <FormField
+                      disabled={isSubmitLoading}
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="password">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative h-auto">
+                              <Input
+                                type={isPasswordShown ? "text" : "password"}
+                                placeholder="Password"
+                                {...field}
+                                disabled={isSubmitLoading}
+                              />
+                              <LucideIcon
+                                icon={isPasswordShown ? "EyeOff" : "Eye"}
+                                className="absolute right-4 top-[.9rem] cursor-pointer w-4 h-4"
+                                onClick={() =>
+                                  setIsPasswordShown((prev) => !prev)
+                                }
+                              />
+                            </div>
+                          </FormControl>{" "}
+                          <PasswordErrors
+                            message={form.formState.errors.password?.message}
+                          />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      disabled={isSubmitLoading}
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="confirmPassword">
+                            Confirm Password
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative h-auto">
+                              <Input
+                                type={
+                                  isConfirmPasswordShown ? "text" : "password"
+                                }
+                                placeholder="Confirm Password"
+                                {...field}
+                                disabled={isSubmitLoading}
+                              />
+                              <LucideIcon
+                                icon={isConfirmPasswordShown ? "EyeOff" : "Eye"}
+                                className="absolute right-4 top-[.9rem] cursor-pointer w-4 h-4"
+                                onClick={() =>
+                                  setIsConfirmPasswordShown((prev) => !prev)
+                                }
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <FormLabel className="!mt-0" htmlFor="toc_accept">
-                  Saya menyetujui{" "}
-                  <span
-                    onClick={() => setIsTocAcceptDialogOpen(true)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    syarat penggunaan Vemer
-                  </span>
-                  .
-                </FormLabel>
+                <FormField
+                  disabled={isSubmitLoading}
+                  control={form.control}
+                  name="toc-accept"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="space-y-2">
+                        <div className="flex flex-row items-center space-x-2">
+                          <FormControl>
+                            <Checkbox
+                              id="toc-accept"
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={field.disabled}
+                              name={field.name}
+                              ref={field.ref}
+                            />
+                          </FormControl>
+                          <FormLabel className="!mt-0" htmlFor="toc_accept">
+                            I agree to{" "}
+                            <span
+                              onClick={() => setIsTocAcceptDialogOpen(true)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Vemer's license and agreement
+                            </span>
+                            .
+                          </FormLabel>
+                        </div>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
                 <Button
                   className="group/btn relative block mt-5 h-10 w-full rounded-md bg-gradient-to-br font-medium bg-sky-500 hover:bg-sky-600 text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
                   type="submit"
@@ -264,21 +379,37 @@ export function SignupForm() {
 
                 <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
-                <div className="flex flex-row justify-center items-center gap-5">
-                  {sso.map((_sso, idx) => (
-                    <Button
-                      variant={"outline"}
-                      className="group/btn relative block text-black text-sm h-10 w-full hover:bg-sky-100 rounded-md flex justify-center items-center font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
-                      key={idx}
-                      onClick={() => setSsoProvider(_sso.provider)}
-                      type="button"
-                    >
-                      <div className="flex flex-row items-center justify-content gap-4">
-                        {idx === 0 ? <Airplay size={18} /> : <Linkedin size={18} />}
-                        {_sso.label}
-                      </div>
-                    </Button>
-                  ))}
+                <div className="flex flex-col items-center justify-center">
+                  <p className="text-lg mb-4">Or continue with:</p>
+                  <div className="flex flex-row justify-center items-center gap-5">
+                    {sso.map((_ssoProvider, idx) => (
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "group/btn relative text-sm h-10 w-full hover:bg-sky-100 rounded-md flex justify-center items-center font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]",
+                          _ssoProvider.provider !== ssoProvider && "text-black",
+                          _ssoProvider.provider === ssoProvider &&
+                            "text-gray-500 border-gray-500"
+                        )}
+                        key={idx}
+                        onClick={() => setSsoProvider(_ssoProvider.provider)}
+                        type="button"
+                        disabled={_ssoProvider.provider === ssoProvider}
+                      >
+                        {_ssoProvider.provider === ssoProvider && (
+                          <LoadingSpinner />
+                        )}
+                        <div className="flex flex-row items-center justify-content gap-4">
+                          {idx === 0 ? (
+                            <LucideIcon icon="Mail" size={18} />
+                          ) : (
+                            <LucideIcon icon="Linkedin" size={18} />
+                          )}
+                          <p>{_ssoProvider.label}</p>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </form>
             </div>
