@@ -13,17 +13,17 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import React, { useState } from "react";
+import { Avatar, AvatarImage } from "./ui/avatar";
+import ProfilePicture from "./profile-picture";
 
 export interface NavbarProps {
-  role: "user"|"unregistered"|"publisher";
+  role: "user" | "unregistered" | "publisher";
 }
 
-export type RoleType = NavbarProps['role']
+export type RoleType = NavbarProps["role"];
 
 export const Navbar = () => {
-
-  const user = useAuth();
-  const role:RoleType = !user.isAuthenticated ? "publisher" : (user.user?.is_publisher ? "publisher" : "user");
+  const { user, isAuth } = useAuth();
 
   const navItems = [
     {
@@ -36,11 +36,16 @@ export const Navbar = () => {
     },
     {
       name: "Leaderboard",
-      link: "/leaderboard"
+      link: "/leaderboard",
     },
     {
       name: "Dashboard",
-      link: role === "user" ? "/user-dashboard" : ( role === "publisher" ? "/publisher-dashboard":"/auth/register"),
+      link:
+        user?.role === "user"
+          ? "/user-dashboard"
+          : user?.role === "publisher"
+          ? "/publisher-dashboard"
+          : "/auth/register",
     },
   ];
 
@@ -53,8 +58,25 @@ export const Navbar = () => {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="dark" href="/auth/login" className="bg-sky-600">Login</NavbarButton>
-            <NavbarButton variant="secondary" href="/auth/register">Register</NavbarButton>
+            {isAuth && user ? (
+              <>
+                <ProfilePicture profilePicturePath={user.profile_photo_path} />
+                <p>{user.name}</p>
+              </>
+            ) : (
+              <>
+                <NavbarButton
+                  variant="dark"
+                  href="/auth/login"
+                  className="bg-sky-600"
+                >
+                  Login
+                </NavbarButton>
+                <NavbarButton variant="secondary" href="/auth/register">
+                  Register
+                </NavbarButton>
+              </>
+            )}
           </div>
         </NavBody>
 
@@ -82,26 +104,37 @@ export const Navbar = () => {
               </a>
             ))}
             <div className="flex w-full flex-col gap-4">
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="dark"
-                className="w-full bg-sky-600"
-                href="/auth/login"
-              >
-                Login
-              </NavbarButton>
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-                href="/auth/register"
-              >
-                Register
-              </NavbarButton>
+              {isAuth && user ? (
+                <>
+                  <ProfilePicture
+                    profilePicturePath={user.profile_photo_path}
+                  />
+                  <p>{user.name}</p>
+                </>
+              ) : (
+                <>
+                  <NavbarButton
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="dark"
+                    className="w-full bg-sky-600"
+                    href="/auth/login"
+                  >
+                    Login
+                  </NavbarButton>
+                  <NavbarButton
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="w-full"
+                    href="/auth/register"
+                  >
+                    Register
+                  </NavbarButton>
+                </>
+              )}
             </div>
           </MobileNavMenu>
         </MobileNav>
       </NavBar>
     </div>
   );
-}
+};

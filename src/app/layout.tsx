@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import AuthProvider from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
+import verifyAuth from "@/lib/verify-auth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -45,17 +46,19 @@ export async function generateViewport(): Promise<Viewport> {
   };
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isAuth } = await verifyAuth();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
+        <AuthProvider authenticated={isAuth}>
           {children}
           <Toaster position="bottom-right" />
         </AuthProvider>
