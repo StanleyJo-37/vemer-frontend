@@ -3,7 +3,6 @@
 import React from "react";
 import { Input } from "@/components/ui/form-input";
 import type { SocialiteProvider } from "@/types/AuthType";
-import { Airplay, Linkedin } from "lucide-react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,6 +35,8 @@ import LoadingSpinner from "@/components/loading-spinner";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import PasswordErrors from "@/components/password-errors";
+import useAuth from "@/hooks/useAuth";
+import Link from "next/link";
 
 const RegisterFormSchema = z
   .object({
@@ -107,6 +108,14 @@ export function SignupForm() {
 
   const router = useRouter();
 
+  const { isAuth } = useAuth();
+
+  useEffect(() => {
+    if (isAuth) {
+      router.back();
+    }
+  }, []);
+
   const form = useForm<z.infer<typeof RegisterFormSchema>>({
     resolver: zodResolver(RegisterFormSchema),
     defaultValues: {
@@ -125,7 +134,11 @@ export function SignupForm() {
 
     const ssoLogin = async () => {
       try {
-        const resp = await AuthAPI.loginSSO(ssoProvider, pathname, "/user-dashboard");
+        const resp = await AuthAPI.loginSSO(
+          ssoProvider,
+          pathname,
+          "/user-dashboard"
+        );
 
         const popup = window.open(
           resp.data.redirect_url as string,
@@ -205,7 +218,14 @@ export function SignupForm() {
                 Welcome to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Start giving back to the community with Vemer.
+                Start giving back to the community with Vemer. Already have an
+                account?{" "}
+                <Link
+                  className="text-blue-600 hover:text-blue-400 underline"
+                  href="/auth/login"
+                >
+                  Login here
+                </Link>
               </p>
 
               <form className="my-8" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -359,7 +379,7 @@ export function SignupForm() {
                               onClick={() => setIsTocAcceptDialogOpen(true)}
                               className="text-blue-600 hover:text-blue-900"
                             >
-                              Vemer's license and agreement
+                              Vemer&rsquo;s license and agreement
                             </span>
                             .
                           </FormLabel>
