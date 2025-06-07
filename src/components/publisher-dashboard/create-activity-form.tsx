@@ -168,7 +168,7 @@ export function CreateActivityForm() {
             <Input
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter event's title"
+              placeholder="Enter activity's title"
               className="text-lg border-gray-200 focus:border-sky-500 focus:ring-sky-500"
               required
             />
@@ -176,7 +176,7 @@ export function CreateActivityForm() {
 
           {/* Upload Photos Section */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900">Upload Photos of the event</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Upload Photos of the activity</h2>
 
             {/* File List */}
             <div className="space-y-2">
@@ -244,11 +244,11 @@ export function CreateActivityForm() {
 
           {/* About This Event */}
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-gray-900">About This Event</h2>
+            <h2 className="text-2xl font-bold text-gray-900">About This Activity</h2>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Write your event description here"
+              placeholder="Write your activity description here"
               rows={6}
               className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
               required
@@ -261,7 +261,7 @@ export function CreateActivityForm() {
             <Textarea
               value={formData.benefits}
               onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-              placeholder="Write your event's benefit"
+              placeholder="Write your activity's benefit"
               rows={4}
               className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
             />
@@ -270,7 +270,7 @@ export function CreateActivityForm() {
           {/* Join Popup Configuration */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Join Event Configuration</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Join Activity Configuration</h2>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="enable-join-popup"
@@ -288,11 +288,11 @@ export function CreateActivityForm() {
                 <CardHeader>
                   <CardTitle className="text-lg text-orange-900 flex items-center gap-2">
                     <MessageSquare className="h-5 w-5" />
-                    Join Event Popup
+                    Join Activity Popup
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label className="text-sm font-medium">Popup Type</Label>
                     <Select
                       value={formData.joinPopupType}
@@ -306,14 +306,24 @@ export function CreateActivityForm() {
                         <SelectItem value="external">External Link (Google Form, etc.)</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Popup Title</Label>
                     <Input
                       value={formData.joinPopupTitle}
                       onChange={(e) => setFormData({ ...formData, joinPopupTitle: e.target.value })}
-                      placeholder="e.g., Welcome to our event!"
+                      placeholder="e.g., Welcome to our activity!"
+                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Popup Message</Label>
+                    <Input
+                      value={formData.joinPopupMessage}
+                      onChange={(e) => setFormData({ ...formData, joinPopupMessage: e.target.value })}
+                      placeholder="e.g., Thank you for your interest in joining this activity!"
                       className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                     />
                   </div>
@@ -322,9 +332,9 @@ export function CreateActivityForm() {
                   <div className="pt-4 border-t border-orange-200">
                     <Label className="text-sm font-medium mb-2 block">Preview</Label>
                     <div className="p-4 bg-white rounded-lg border border-orange-200">
-                      <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Event"}</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Activity"}</h3>
                       <p className="text-sm text-gray-600 mb-3">
-                        {formData.joinPopupMessage || "Thank you for your interest in joining this event!"}
+                        {formData.joinPopupMessage || "Thank you for your interest in joining this activity!"}
                       </p>
                     </div>
                   </div>
@@ -336,7 +346,7 @@ export function CreateActivityForm() {
           {/* Badge Creation Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Create Event Badge</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Create Activity Badge</h2>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="create-badge"
@@ -489,7 +499,7 @@ export function CreateActivityForm() {
             </CardContent>
           </Card>
 
-          {/* Event Details */}
+          {/* Activity Details */}
           <Card className="border-gray-200">
             <CardContent className="p-6 space-y-4">
               {/* Category */}
@@ -592,7 +602,7 @@ export function CreateActivityForm() {
                   className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
-                <p className="text-xs text-gray-500">Points participants will earn for attending this event</p>
+                <p className="text-xs text-gray-500">Points participants will earn for attending this activity</p>
               </div>
 
               {/* Price */}
@@ -618,7 +628,7 @@ export function CreateActivityForm() {
                   className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                 />
                 <p className="text-xs text-gray-500">
-                  {formData.isFree ? "This event is free" : `This event costs $${formData.price}`}
+                  {formData.isFree ? "This activity is free" : `This activity costs $${formData.price}`}
                 </p>
               </div>
             </CardContent>
@@ -633,7 +643,7 @@ export function CreateActivityForm() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">John Publisher</p>
-                  <p className="text-sm text-gray-600">Event Organizer</p>
+                  <p className="text-sm text-gray-600">Activity Organizer</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
