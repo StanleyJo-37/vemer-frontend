@@ -45,7 +45,7 @@ export const Navbar = () => {
           ? "/user-dashboard"
           : user?.role === "publisher"
           ? "/publisher-dashboard"
-          : "/auth/register",
+          : "/auth/login",
     },
   ];
 
