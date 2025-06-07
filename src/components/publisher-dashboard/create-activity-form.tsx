@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users, Star, Award, MessageSquare, Link } from "lucide-react"
+import { X, Plus, Upload, User, Calendar, Clock, MapPin, Users, Star, Award, MessageSquare } from "lucide-react"
 
 export function CreateActivityForm() {
   const [formData, setFormData] = useState({
@@ -21,10 +21,10 @@ export function CreateActivityForm() {
     category: "",
     location: "",
     date: "",
+    endDate: "",
     time: "",
-    price: "",
+    price: "0",
     isFree: true,
-    maxParticipants: "",
     points: "",
     images: [] as File[],
     thumbnailIndex: 0,
@@ -34,19 +34,10 @@ export function CreateActivityForm() {
     badgeDescription: "",
     badgeIcon: null as File | null,
     badgeRarity: "Common",
-    // Join popup fields
+    // Simplified join popup fields
     enableJoinPopup: false,
     joinPopupTitle: "",
     joinPopupMessage: "",
-    joinPopupType: "message" as "message",
-    externalFormUrl: "",
-    customFormFields: [] as Array<{
-      id: string
-      label: string
-      type: "text" | "email" | "phone" | "textarea" | "select"
-      required: boolean
-      options?: string[]
-    }>,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -69,10 +60,10 @@ export function CreateActivityForm() {
       category: "",
       location: "",
       date: "",
+      endDate: "",
       time: "",
-      price: "",
+      price: "0",
       isFree: true,
-      maxParticipants: "",
       points: "",
       images: [],
       thumbnailIndex: 0,
@@ -84,9 +75,6 @@ export function CreateActivityForm() {
       enableJoinPopup: false,
       joinPopupTitle: "",
       joinPopupMessage: "",
-      joinPopupType: "message",
-      externalFormUrl: "",
-      customFormFields: [],
     })
 
     setIsSubmitting(false)
@@ -115,31 +103,6 @@ export function CreateActivityForm() {
     setFormData({ ...formData, thumbnailIndex: index })
   }
 
-  const addCustomFormField = () => {
-    const newField = {
-      id: `field_${Date.now()}`,
-      label: "",
-      type: "text" as const,
-      required: false,
-    }
-    setFormData({
-      ...formData,
-      customFormFields: [...formData.customFormFields, newField],
-    })
-  }
-
-  const updateCustomFormField = (index: number, updates: Partial<(typeof formData.customFormFields)[0]>) => {
-    const updatedFields = formData.customFormFields.map((field, i) => (i === index ? { ...field, ...updates } : field))
-    setFormData({ ...formData, customFormFields: updatedFields })
-  }
-
-  const removeCustomFormField = (index: number) => {
-    setFormData({
-      ...formData,
-      customFormFields: formData.customFormFields.filter((_, i) => i !== index),
-    })
-  }
-
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case "Common":
@@ -159,42 +122,42 @@ export function CreateActivityForm() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Left Column - Main Content */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
           {/* Title Section */}
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-gray-900">Title</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Title</h2>
             <Input
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter activity's title"
-              className="text-lg border-gray-200 focus:border-sky-500 focus:ring-sky-500"
+              placeholder="Enter event's title"
+              className="text-base sm:text-lg border-gray-200 focus:border-sky-500 focus:ring-sky-500"
               required
             />
           </div>
 
           {/* Upload Photos Section */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900">Upload Photos of the activity</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Upload Photos of the event</h2>
 
             {/* File List */}
             <div className="space-y-2">
               {formData.images.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-sky-100 rounded flex items-center justify-center">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-8 h-8 bg-sky-100 rounded flex items-center justify-center flex-shrink-0">
                       <Upload className="h-4 w-4 text-sky-600" />
                     </div>
-                    <span className="text-sm text-gray-700 truncate max-w-md">{file.name}</span>
+                    <span className="text-sm text-gray-700 truncate">{file.name}</span>
                     {index === formData.thumbnailIndex && (
                       <Badge className="bg-green-100 text-green-800 text-xs cursor-default">Thumbnail</Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {index !== formData.thumbnailIndex && (
                       <Button
                         type="button"
@@ -244,11 +207,11 @@ export function CreateActivityForm() {
 
           {/* About This Event */}
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-gray-900">About This Activity</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">About This Event</h2>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Write your activity description here"
+              placeholder="Write your event description here"
               rows={6}
               className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
               required
@@ -257,20 +220,20 @@ export function CreateActivityForm() {
 
           {/* What Will You Get */}
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-gray-900">What Will You Get?</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">What Will You Get?</h2>
             <Textarea
               value={formData.benefits}
               onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-              placeholder="Write your activity's benefit"
+              placeholder="Write your event's benefit"
               rows={4}
               className="border-gray-200 focus:border-sky-500 focus:ring-sky-500 bg-sky-50"
             />
           </div>
 
-          {/* Join Popup Configuration */}
+          {/* Simplified Join Popup Configuration */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Join Activity Configuration</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Join Event Message</h2>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="enable-join-popup"
@@ -278,7 +241,7 @@ export function CreateActivityForm() {
                   onCheckedChange={(checked) => setFormData({ ...formData, enableJoinPopup: checked })}
                 />
                 <Label htmlFor="enable-join-popup" className="text-sm font-medium">
-                  Show popup when users join
+                  Show message when users join
                 </Label>
               </div>
             </div>
@@ -288,56 +251,46 @@ export function CreateActivityForm() {
                 <CardHeader>
                   <CardTitle className="text-lg text-orange-900 flex items-center gap-2">
                     <MessageSquare className="h-5 w-5" />
-                    Join Activity Popup
+                    Join Event Message
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* <div className="space-y-2">
-                    <Label className="text-sm font-medium">Popup Type</Label>
-                    <Select
-                      value={formData.joinPopupType}
-                      onValueChange={(value: any) => setFormData({ ...formData, joinPopupType: value })}
-                    >
-                      <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="message">Simple Message</SelectItem>
-                        <SelectItem value="external">External Link (Google Form, etc.)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div> */}
-
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Popup Title</Label>
+                    <Label className="text-sm font-medium">Message Title</Label>
                     <Input
                       value={formData.joinPopupTitle}
                       onChange={(e) => setFormData({ ...formData, joinPopupTitle: e.target.value })}
-                      placeholder="e.g., Welcome to our activity!"
+                      placeholder="e.g., Welcome to our event!"
                       className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Popup Message</Label>
-                    <Input
+                    <Label className="text-sm font-medium">Message Description</Label>
+                    <Textarea
                       value={formData.joinPopupMessage}
                       onChange={(e) => setFormData({ ...formData, joinPopupMessage: e.target.value })}
-                      placeholder="e.g., Thank you for your interest in joining this activity!"
+                      placeholder="Thank you for joining! Please fill out our form at https://forms.google.com/... for additional details."
+                      rows={4}
                       className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                     />
+                    <p className="text-xs text-gray-600">
+                      Tip: Include any links (like Google Forms) in your message - they will be clickable for users.
+                    </p>
                   </div>
 
                   {/* Preview */}
-                  <div className="pt-4 border-t border-orange-200">
-                    <Label className="text-sm font-medium mb-2 block">Preview</Label>
-                    <div className="p-4 bg-white rounded-lg border border-orange-200">
-                      <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Activity"}</h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {formData.joinPopupMessage || "Thank you for your interest in joining this activity!"}
-                      </p>
+                  {(formData.joinPopupTitle || formData.joinPopupMessage) && (
+                    <div className="pt-4 border-t border-orange-200">
+                      <Label className="text-sm font-medium mb-2 block">Preview</Label>
+                      <div className="p-4 bg-white rounded-lg border border-orange-200">
+                        <h3 className="font-semibold text-gray-900 mb-2">{formData.joinPopupTitle || "Join Event"}</h3>
+                        <p className="text-sm text-gray-600">
+                          {formData.joinPopupMessage || "Thank you for your interest in joining this event!"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -345,8 +298,8 @@ export function CreateActivityForm() {
 
           {/* Badge Creation Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Create Activity Badge</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Create Event Badge</h2>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="create-badge"
@@ -411,7 +364,7 @@ export function CreateActivityForm() {
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Badge Icon</Label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
                       <Input
                         id="badge-icon"
                         type="file"
@@ -477,10 +430,10 @@ export function CreateActivityForm() {
         </div>
 
         {/* Right Column - Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Thumbnail Preview */}
           <Card className="border-gray-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Thumbnail</h3>
               <div className="aspect-square bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                 {formData.images.length > 0 ? (
@@ -491,7 +444,7 @@ export function CreateActivityForm() {
                   />
                 ) : (
                   <div className="text-center">
-                    <Plus className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <Plus className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Upload images to see thumbnail</p>
                   </div>
                 )}
@@ -499,9 +452,9 @@ export function CreateActivityForm() {
             </CardContent>
           </Card>
 
-          {/* Activity Details */}
+          {/* Event Details */}
           <Card className="border-gray-200">
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 sm:p-6 space-y-4">
               {/* Category */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -530,7 +483,7 @@ export function CreateActivityForm() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-600" />
-                  <Label className="text-sm font-medium">Date</Label>
+                  <Label className="text-sm font-medium">Start Date</Label>
                 </div>
                 <Input
                   type="date"
@@ -539,6 +492,23 @@ export function CreateActivityForm() {
                   className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
+              </div>
+
+              {/* End Date */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-600" />
+                  <Label className="text-sm font-medium">End Date</Label>
+                </div>
+                <Input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
+                  min={formData.date}
+                  required
+                />
+                <p className="text-xs text-gray-500">End date must be on or after the start date</p>
               </div>
 
               {/* Time */}
@@ -571,22 +541,6 @@ export function CreateActivityForm() {
                 />
               </div>
 
-              {/* Max Participants */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-600" />
-                  <Label className="text-sm font-medium">Max Participants</Label>
-                </div>
-                <Input
-                  type="number"
-                  value={formData.maxParticipants}
-                  onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                  placeholder="Enter max participants"
-                  min="1"
-                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
-                />
-              </div>
-
               {/* Points */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -602,48 +556,21 @@ export function CreateActivityForm() {
                   className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
                   required
                 />
-                <p className="text-xs text-gray-500">Points participants will earn for attending this activity</p>
-              </div>
-
-              {/* Price */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">💰</span>
-                  <Label className="text-sm font-medium">Price</Label>
-                </div>
-                <Input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setFormData({
-                      ...formData,
-                      price: value,
-                      isFree: value === "" || value === "0",
-                    })
-                  }}
-                  placeholder="0.00 (Free)"
-                  min="0"
-                  step="0.01"
-                  className="border-gray-200 focus:border-sky-500 focus:ring-sky-500"
-                />
-                <p className="text-xs text-gray-500">
-                  {formData.isFree ? "This activity is free" : `This activity costs $${formData.price}`}
-                </p>
+                <p className="text-xs text-gray-500">Points participants will earn for attending this event</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Organizer Info */}
           <Card className="border-gray-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">John Publisher</p>
-                  <p className="text-sm text-gray-600">Activity Organizer</p>
+                  <p className="text-sm text-gray-600">Event Organizer</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
