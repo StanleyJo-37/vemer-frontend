@@ -117,7 +117,7 @@ const mockLeaderboardData: UserFormat[] = [
 ];
 
 export function UserLeaderboard() {
-  const [timeFilter, setTimeFilter] = useState<string>("all-time");
+  // const [timeFilter, setTimeFilter] = useState<string>("all-time");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   const [totalActiveUser, setTotalActiveUser] = useState<number>(0);
@@ -220,7 +220,7 @@ export function UserLeaderboard() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Select value={timeFilter} onValueChange={setTimeFilter}>
+        {/* <Select value={timeFilter} onValueChange={setTimeFilter}>
           <SelectTrigger className="w-full sm:w-48 border-sky-200 focus:border-sky-400 focus:ring-sky-400">
             <SelectValue placeholder="Time period" />
           </SelectTrigger>
@@ -230,7 +230,7 @@ export function UserLeaderboard() {
             <SelectItem value="this-month">This Month</SelectItem>
             <SelectItem value="this-week">This Week</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-full sm:w-48 border-sky-200 focus:border-sky-400 focus:ring-sky-400">
             <SelectValue placeholder="Category" />
