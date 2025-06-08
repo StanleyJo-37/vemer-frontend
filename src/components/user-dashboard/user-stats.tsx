@@ -16,13 +16,7 @@ import { useCallback, useEffect, useState } from "react";
 import LoadingSpinner from "../loading-spinner";
 import { StatsType } from "@/types/DashboardType";
 import LucideIcon from "../lucide-icon";
-"use client"
-
 import UserDashboardAPI from "@/api/UserDashboardAPI"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Star, Calendar, Award, TrendingUp } from "lucide-react"
-import { useState, useEffect, useCallback } from "react"
 
 export function UserStats() {
   const [stats, setStats] = useState<StatsType>({
