@@ -2,13 +2,17 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Award, Star, Heart, ArrowLeft, Lock, HeartOff, Filter } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import UserDashboardAPI from "@/api/UserDashboardAPI"
+import { toast } from "@/hooks/useToast"
+import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react"
 
 const allBadges = [
   {
@@ -117,8 +121,29 @@ export default function BadgesPage() {
   const router = useRouter()
   const [badges, setBadges] = useState(allBadges)
   const [filter, setFilter] = useState("all")
+  const [isLoading, setIsLoading] = useState(true);
+  const [badgesPage, setBadgesPage] = useState<number>(1);
 
-  const earnedBadges = badges.filter((badge) => badge.earned)
+  // const earnedBadges = badges.filter((badge) => badge.earned);
+
+  const getUserBadges = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const resp = await UserDashboardAPI.getUserBadges({ page: badgesPage, per_page:16 });
+      setBadges(resp.data);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        toast(err.response?.data.message || err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [badgesPage]);
+
+  useEffect(() => {
+    getUserBadges();
+  }, [getUserBadges]);
+  
 
   const toggleFavorite = (badgeId: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -155,7 +180,15 @@ export default function BadgesPage() {
     }
   })
 
-  return (
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-4 sm:py-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+        <Loader2 className="h-12 w-12 animate-spin text-sky-600 mb-4" />
+        <p className="text-lg text-gray-700">Loading Badges...</p>
+        <p className="text-sm text-gray-500">Please wait a moment.</p>
+      </div>
+    );
+  }else{ return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.back()} className="mb-4 hover:bg-sky-50">
@@ -330,4 +363,4 @@ export default function BadgesPage() {
       )}
     </div>
   )
-}
+}};

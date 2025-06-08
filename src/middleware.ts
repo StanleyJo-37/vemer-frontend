@@ -20,8 +20,7 @@ export async function middleware(request: NextRequest) {
 
   if (publisherRoutes.some((route) => pathname.startsWith(route))) {
     const response = await PublisherDashboardAPI.isPublisher();
-    console.log(typeof response);
-    console.log(response);
+
     if (!response.data) {
       const notfoundUrl = new URL("/404notfound", request.url);
       notfoundUrl.searchParams.set("redirectedFrom", pathname);

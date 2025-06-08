@@ -224,7 +224,7 @@ const PublisherDashboardAPI = {
 
   isPublisher: async (): Promise<SuccessResponse> => {
     return API.AuthenticatedAPI.request({
-      url: "/dashboard/publisher/is-publisher",
+      url: "/is-publisher",
       method: "GET",
     });
   },
