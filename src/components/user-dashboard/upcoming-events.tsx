@@ -11,7 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import UserDashboardAPI from "@/api/UserDashboardAPI";
+import { AxiosError } from "axios";
+import { useToast } from "@/hooks/useToast";
+import LoadingSpinner from "../loading-spinner";
 
 export function UpcomingEvents() {
   const router = useRouter();
@@ -61,6 +65,29 @@ export function UpcomingEvents() {
     },
   ]);
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { toast } = useToast();
+
+  const getUpcomingEvents = async () => {
+    setIsLoading(true);
+    try {
+      const resp = await UserDashboardAPI.getUpcomingEvents({ limit: 3 });
+
+      setUpcomingEvents(resp.data);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        toast(err.response?.data.message || err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getUpcomingEvents();
+  }, []);
+
   const handleViewEvent = (eventId: string) => {
     router.push(`/activities/${eventId}`);
   };
@@ -86,7 +113,9 @@ export function UpcomingEvents() {
               <Calendar className="h-5 w-5 text-sky-600" />
               Upcoming Events
             </CardTitle>
-            <CardDescription>Events you're registered for</CardDescription>
+            <CardDescription>
+              Events you&rsquo;re registered for
+            </CardDescription>
           </div>
           <Button
             variant="outline"
@@ -99,101 +128,108 @@ export function UpcomingEvents() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {upcomingEvents.map((event) => {
-            const daysUntil = getDaysUntilEvent(event.date);
-            return (
-              <div
-                key={event.id}
-                className="p-4 border border-gray-200 rounded-lg hover:border-sky-200 hover:shadow-md transition-all duration-200 cursor-pointer"
-                onClick={() => handleViewEvent(event.id)}
-              >
-                <div className="flex flex-col gap-3">
-                  <div className="flex-shrink-0">
-                    <img
-                      src={event.image || "/placeholder.svg"}
-                      alt={event.title}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2 gap-2">
-                      <h3 className="font-semibold text-gray-900 line-clamp-1">
-                        {event.title}
-                      </h3>
-                      <Badge
-                        variant="outline"
-                        className="text-xs cursor-default"
-                      >
-                        {event.category}
-                      </Badge>
+      {isLoading ? (
+        <CardContent className="flex flex-row items-center justify-center space-x-4 pt-6">
+          <p>Please Wait...</p>
+          <LoadingSpinner />
+        </CardContent>
+      ) : (
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingEvents.map((event) => {
+              const daysUntil = getDaysUntilEvent(event.date);
+              return (
+                <div
+                  key={event.id}
+                  className="p-4 border border-gray-200 rounded-lg hover:border-sky-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => handleViewEvent(event.id)}
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex-shrink-0">
+                      <img
+                        src={event.image || "/placeholder.svg"}
+                        alt={event.title}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
                     </div>
 
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {event.description}
-                    </p>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <h3 className="font-semibold text-gray-900 line-clamp-1">
+                          {event.title}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          className="text-xs cursor-default"
+                        >
+                          {event.category}
+                        </Badge>
+                      </div>
 
-                    <div className="space-y-1 text-xs text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-sky-600" />
-                        <span>
-                          {new Date(event.date).toLocaleDateString()} at{" "}
-                          {event.time}
-                          {daysUntil === 0 && (
-                            <span className="text-green-600 font-medium ml-1">
-                              (Today!)
-                            </span>
-                          )}
-                          {daysUntil === 1 && (
-                            <span className="text-orange-600 font-medium ml-1">
-                              (Tomorrow)
-                            </span>
-                          )}
-                          {daysUntil > 1 && (
-                            <span className="text-gray-500 ml-1">
-                              ({daysUntil} days)
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3 text-sky-600" />
-                        <span className="line-clamp-1">{event.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-3 w-3 text-sky-600" />
-                        <span>
-                          {event.spotsLeft} spots left of {event.totalSpots}
-                        </span>
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                        {event.description}
+                      </p>
+
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3 text-sky-600" />
+                          <span>
+                            {new Date(event.date).toLocaleDateString()} at{" "}
+                            {event.time}
+                            {daysUntil === 0 && (
+                              <span className="text-green-600 font-medium ml-1">
+                                (Today!)
+                              </span>
+                            )}
+                            {daysUntil === 1 && (
+                              <span className="text-orange-600 font-medium ml-1">
+                                (Tomorrow)
+                              </span>
+                            )}
+                            {daysUntil > 1 && (
+                              <span className="text-gray-500 ml-1">
+                                ({daysUntil} days)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3 text-sky-600" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="h-3 w-3 text-sky-600" />
+                          <span>
+                            {event.spotsLeft} spots left of {event.totalSpots}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {upcomingEvents.length === 0 && (
-          <div className="text-center py-8">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No upcoming events
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Discover and join community events to get started!
-            </p>
-            <Button
-              onClick={() => router.push("/activities")}
-              className="bg-sky-600 hover:bg-sky-700"
-            >
-              Browse Events
-            </Button>
+              );
+            })}
           </div>
-        )}
-      </CardContent>
+
+          {upcomingEvents.length === 0 && (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No upcoming events
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Discover and join community events to get started!
+              </p>
+              <Button
+                onClick={() => router.push("/activities")}
+                className="bg-sky-600 hover:bg-sky-700"
+              >
+                Browse Events
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 }

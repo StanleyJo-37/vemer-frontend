@@ -140,8 +140,8 @@ export default function LoginForm() {
                 Welcome Back to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Start giving back to the community with Vemer. Don't have an
-                account?{" "}
+                Start giving back to the community with Vemer. Don&rsquo;t have
+                an account?{" "}
                 <Link
                   className="text-blue-600 hover:text-blue-400 underline"
                   href="/auth/register"
@@ -208,7 +208,7 @@ export default function LoginForm() {
                           onCheckedChange={field.onChange}
                         />
                         <FormLabel className="!mt-0" htmlFor="remember_me">
-                          Ingat Saya
+                          Remember Me
                         </FormLabel>
                       </FormItem>
                     )}
@@ -238,11 +238,7 @@ export default function LoginForm() {
                         disabled={_ssoProvider.provider === ssoProvider}
                       >
                         <div className="flex flex-row items-center justify-content gap-4">
-                          {idx === 0 ? (
-                            <LucideIcon icon="Mail" size={18} />
-                          ) : (
-                            <LucideIcon icon="Linkedin" size={18} />
-                          )}
+                          <LucideIcon icon={_ssoProvider.iconName} size={18} />
                           <p>{_ssoProvider.label}</p>
                         </div>
                       </Button>

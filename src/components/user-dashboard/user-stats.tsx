@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardAPI from "@/api/DashboardAPI";
+import UserDashboardAPI from "@/api/UserDashboardAPI";
 import {
   Card,
   CardContent,
@@ -34,7 +34,7 @@ export function UserStats() {
   const getStats = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resp = await DashboardAPI.getStats();
+      const resp = await UserDashboardAPI.getStats();
 
 
       setStats(resp.data);
@@ -61,12 +61,10 @@ export function UserStats() {
         <CardDescription>Your community impact at a glance</CardDescription>
       </CardHeader>
       {isLoading ? (
-        <Card className="border-sky-100">
-          <CardContent className="flex flex-row items-center justify-center space-x-4 pt-6">
-            <p>Please Wait...</p>
-            <LoadingSpinner />
-          </CardContent>
-        </Card>
+        <CardContent className="flex flex-row items-center justify-center space-x-4 pt-6">
+          <p>Please Wait...</p>
+          <LoadingSpinner />
+        </CardContent>
       ) : (
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
