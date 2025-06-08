@@ -1,5 +1,7 @@
+import { extend } from "lodash";
 import API from "./axios";
 import { UserFormat } from "@/components/leaderboard";
+import { boolean } from "zod";
 
 interface Activity {
   id: number;
@@ -43,23 +45,32 @@ interface PaginatedResponse<T> {
 }
 
 interface CreateActivityPayload {
-  title: string;
-  image: File;
-  about: string;
-  what_will_you_get: string;
-  category: string;
-  time: string; 
-  date: string;
-  location: string;
-  point_reward: number;
+  title: string,
+  image: File|null,
+  activity_description :string,
+  category :string,
+  start_date : string,
+  end_date: string,
+  location : string,
+  point_reward : number,
+}
+
+interface CreateRegisterPopupInfoPayload {
+  popup_title: string;
+  popup_description: string;
 }
 
 interface CreateBadgePayload {
   activity_id: number;
   name: string;
-  image: File;
-  description: string;
+  icon: File|null;
+  badge_description: string;
 }
+
+export type CreateActivityFull = Omit<CreateBadgePayload, "activity_id"> & CreateActivityPayload & CreateRegisterPopupInfoPayload & {
+  badge_exist: boolean,
+  popup_exist: boolean
+};
 
 interface ApproveParticipantPayload {
   activity_id: number;
@@ -94,7 +105,7 @@ const PublisherDashboardAPI = {
   },
   getActivities: async (): Promise<Activity[]> => {
     return API.AuthenticatedAPI.request({
-      url: "/activities",
+      url: "/dashboard/publisher/activities",
       method: "GET",
     });
   },
@@ -109,14 +120,14 @@ const PublisherDashboardAPI = {
       },
     });
   },
+
   createActivity: async (
     payload: CreateActivityPayload
   ): Promise<SuccessResponse> => {
     const formData = new FormData();
 
-    // Append semua data ke FormData
     Object.entries(payload).forEach(([key, value]) => {
-      formData.append(key, value);
+        formData.append(key, value as string | Blob);
     });
 
     return API.AuthenticatedAPI.request({
@@ -128,16 +139,32 @@ const PublisherDashboardAPI = {
       },
     });
   },
+
+  createRegisterPopupInfo: async (
+    payload: CreateRegisterPopupInfoPayload
+  ): Promise<SuccessResponse> => {
+
+    return API.AuthenticatedAPI.request({
+      url: "/dashboard/publisher/create-register-popup-info",
+      method: "POST",
+      data: payload,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   createBadge: async (
     payload: CreateBadgePayload
   ): Promise<SuccessResponse> => {
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
-      formData.append(key, value as string | Blob);
+      console.log("Val: ",value, "typeval", typeof value);
+        formData.append(key, value as string | Blob);
     });
 
     return API.AuthenticatedAPI.request({
-      url: "/create-badge",
+      url: "/dashboard/publisher/create-badge",
       method: "POST",
       data: formData,
       headers: {
@@ -145,11 +172,34 @@ const PublisherDashboardAPI = {
       },
     });
   },
+
+  createActivityFull: async (
+    payload: CreateActivityFull
+  ): Promise<SuccessResponse> => {
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (typeof value === "boolean") {
+        formData.append(key, value ? "1" : "0");
+      } else {
+        formData.append(key, value as string | Blob);
+      }
+    });
+
+    return API.AuthenticatedAPI.request({
+      url: "/dashboard/publisher/create-activity-popup-badge",
+      method: "POST",
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   approveParticipant: async (
     payload: ApproveParticipantPayload
   ): Promise<SuccessResponse> => {
     return API.AuthenticatedAPI.request({
-      url: "/approve-participant",
+      url: "/dashboard/publisher/approve-participant",
       method: "POST",
       data: payload,
     });
@@ -163,7 +213,7 @@ const PublisherDashboardAPI = {
     formData.append("folder", folder);
 
     return API.AuthenticatedAPI.request({
-      url: "/upload-image",
+      url: "/dashboard/publisher/upload-image",
       method: "POST",
       data: formData,
       headers: {
