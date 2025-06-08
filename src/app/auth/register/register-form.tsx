@@ -197,7 +197,7 @@ export function SignupForm() {
       } else {
         router.push("/user-dashboard");
       }
-      
+
       setIsAuth(true);
     } catch (err) {
       if (err instanceof AxiosError) {
