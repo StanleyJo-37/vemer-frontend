@@ -26,7 +26,12 @@ const AuthAPI = {
                 target_path,
             }
         });
-    }
+    },
+    logout: async() => {
+        return await API.AuthenticatedAPI.request({
+        
+        });
+    },
 };
 
 export default AuthAPI;

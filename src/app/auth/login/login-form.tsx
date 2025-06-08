@@ -42,7 +42,7 @@ export default function LoginForm() {
 
   const router = useRouter();
 
-  const { isAuth } = useAuth();
+  const { isAuth, setIsAuth } = useAuth();
 
   useEffect(() => {
     if (isAuth) {
@@ -84,6 +84,8 @@ export default function LoginForm() {
           localStorage.removeItem("user");
           localStorage.setItem("user", JSON.stringify(user as UserType));
 
+          setIsAuth(true);
+
           window.removeEventListener("message", listener);
 
           router.push(targetPath || "/dashboard");
@@ -114,9 +116,11 @@ export default function LoginForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      if (!respData.profile_completion) {
-        router.push("/auth/profile-completion");
-      }
+      setIsAuth(true);
+
+      // if (!respData.profile_completion) {
+      //   router.push("/auth/profile-completion");
+      // }
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
     } finally {

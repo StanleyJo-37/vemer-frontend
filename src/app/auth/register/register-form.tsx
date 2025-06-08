@@ -108,7 +108,7 @@ export function SignupForm() {
 
   const router = useRouter();
 
-  const { isAuth } = useAuth();
+  const { isAuth, setIsAuth } = useAuth();
 
   useEffect(() => {
     if (isAuth) {
@@ -152,6 +152,8 @@ export function SignupForm() {
           localStorage.removeItem("user");
           localStorage.setItem("user", JSON.stringify(user as UserType));
 
+          setIsAuth(true);
+
           window.removeEventListener("message", listener);
 
           router.push(targetPath || "/dashboard");
@@ -184,7 +186,9 @@ export function SignupForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      router.push("/auth/profile-completion");
+      setIsAuth(true);
+
+      // router.push("/auth/profile-completion");
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
