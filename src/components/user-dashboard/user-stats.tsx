@@ -36,6 +36,7 @@ export function UserStats() {
     try {
       const resp = await DashboardAPI.getStats();
 
+
       setStats(resp.data);
     } catch (err) {
       if (err instanceof AxiosError) {

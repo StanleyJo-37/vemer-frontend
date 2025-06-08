@@ -13,6 +13,13 @@ const ActivityAPI = {
             url: "/activities/" + activity_id + "/enroll",
             method: 'POST',
         })
+    },
+
+    getStatus : async(activity_id:number)=>{
+        return API.AuthenticatedAPI.request({
+            url: "/activities/" + activity_id + "/get-status",
+            method: 'GET'
+        })
     }
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +20,7 @@ import {
   Award,
 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
+import { RegistrationStatus } from "@/types/StatusTypes"
 import ActivityAPI from "@/api/ActivityAPI"
 
 // Updated mock data with all events free and simplified join popup
@@ -235,46 +236,50 @@ export default function ActivityDetailsPage() {
   const router = useRouter()
   const params = useParams()
   const [activity, setActivity] = useState<any>(null)
-  const [isJoined, setIsJoined] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [canJoin, setCanJoin] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus>("Unregistered");
   const [showJoinPopup, setShowJoinPopup] = useState(false)
+
+  const handleRender = useCallback(async () => {
+    const status: string = (await ActivityAPI.getStatus(Number(params?.activity_id[0]))).data;
+    setRegistrationStatus(status as RegistrationStatus);
+    console.log(status);
+    setCanJoin(true);
+  }, [params?.activity_id]);
 
   useEffect(() => {
     // Get the ID from the URL using useParams
-    const id = params?.activity_id as string
+    
+    setActivity(mockActivities[0]);
+    console.log(isLoading);
+    handleRender();
+    setIsLoading(false);
+  }, [params, handleRender])
 
-    console.log("URL params:", params)
-    console.log("Activity ID from URL:", id)
-    console.log(
-      "Available activities:",
-      mockActivities.map((a) => ({ id: a.id, title: a.title })),
-    )
-
-    // Find the activity by ID
-    const foundActivity = mockActivities.find((a) => a.id === id)
-    console.log("Found activity:", foundActivity)
-
-    if (foundActivity) {
-      setActivity(foundActivity)
-    }
-    setIsLoading(false)
-  }, [params])
 
   const handleJoinActivity = async (e: React.FormEvent) => {
-    // if (activity?.joinPopup) {
-    //   setShowJoinPopup(true)
-    // } else {
-    //   // Direct join without popup
-    //   setIsJoined(true)
-    //   alert("Successfully joined the event!")
-    // }
-    const response = await ActivityAPI.enroll(9);
+    if (activity?.joinPopup) {
+      setShowJoinPopup(true);
+    } else {
+      setCanJoin(false);
+      // Direct join without popup
+      alert("Successfully joined the event!")
+      const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
+      await handleRender();
+      setCanJoin(true);
+    }
+    
+    
   }
-
-  const handleJoinConfirm = () => {
-    setIsJoined(true)
+  
+  const handleJoinConfirm = async () => {
+    setCanJoin(false);
     setShowJoinPopup(false)
     alert("Successfully joined the event!")
+    const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
+    await handleRender();
+    setCanJoin(true);
   }
 
   const handleShare = () => {
@@ -456,23 +461,55 @@ export default function ActivityDetailsPage() {
               <div className="text-2xl sm:text-3xl font-bold text-green-600">Free</div>
 
               <Button
-                className={`w-full ${isJoined ? "bg-sky-100 text-sky-700 border-sky-200" : "bg-sky-600 hover:bg-sky-700"}`}
+                className={`w-full ${ (['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) || !canJoin ? "bg-sky-100 text-sky-700 border-sky-200" : ( registrationStatus === "Unregistered" as RegistrationStatus ? "bg-sky-600 hover:bg-sky-700" : "bg-red-500 hover:bg-red-300")}`}
                 onClick={handleJoinActivity}
-                variant={isJoined ? "outline" : "default"}
-                disabled={isJoined}
+                variant={ (['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) ? "outline" : "default"}
+                disabled={(['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) || !canJoin}
               >
-                {isJoined ? (
-                  <>
-                    <Heart className="mr-2 h-4 w-4 fill-current" />
-                    Joined
-                  </>
-                ) : (
-                  "Join Activity"
-                )}
+                { canJoin ?
+                  (() => {
+                      switch (registrationStatus) {
+                        case "Pending":
+                          return (
+                            <>
+                              <Heart className="mr-2 h-4 w-4 fill-current" />
+                              Pending Approval
+                            </>
+                          );
+                        case "Completed":
+                          return (
+                            <>
+                              <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                              Completed
+                            </>
+                          );
+                        case "Confirmed":
+                          return (
+                            <>
+                              <Star className="mr-2 h-4 w-4 text-yellow-500" />
+                              Confirmed
+                            </>
+                          );
+                        case "Unregistered":
+                          return "Join Activity";
+                        case "Cancelled":
+                          return (
+                            <>
+                              <Heart className="mr-2 h-4 w-4 text-red-500" />
+                              Rejected
+                            </>
+                          );
+                        default:
+                          return "Join Activity";
+                      }
+                  })()
+                :
+                  "Wait ..."
+                }
               </Button>
 
               <div className="text-sm text-gray-600 text-center">
-                {isJoined ? "You're registered for this activity!" : "Click to register for this activity"}
+                {registrationStatus != "Unregistered" ? "You're registered for this activity!" : "Click to register for this activity"}
               </div>
             </CardContent>
           </Card>
