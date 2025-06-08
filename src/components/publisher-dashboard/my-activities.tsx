@@ -302,7 +302,7 @@ export function MyActivities() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setEditingActivity(activity)}
@@ -310,7 +310,7 @@ export function MyActivities() {
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="outline"
                     size="sm"
@@ -320,14 +320,14 @@ export function MyActivities() {
                     <Bell className="h-4 w-4 mr-1" />
                     Notify
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteActivity(activity.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                   >
                     <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                 </div>
 
                 <div className="flex items-center gap-2">
