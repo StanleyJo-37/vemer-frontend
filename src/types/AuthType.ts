@@ -6,6 +6,8 @@ export interface AuthContextType {
   isAuthLoading?: boolean;
   isAuthenticated?: boolean;
   isAuth?: boolean;
+  setIsAuth: (newAuth: boolean) => void;
+  logout: () => Promise<void>;
 }
 
 export type SocialiteProvider = "google" | "linkedin-openid";

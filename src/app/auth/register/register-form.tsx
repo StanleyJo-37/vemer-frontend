@@ -3,7 +3,6 @@
 import React from "react";
 import { Input } from "@/components/ui/form-input";
 import type { SocialiteProvider } from "@/types/AuthType";
-import { Airplay, Linkedin } from "lucide-react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
@@ -38,6 +37,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import PasswordErrors from "@/components/password-errors";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import useAuth from "@/hooks/useAuth";
+import Link from "next/link";
 
 const RegisterFormSchema = z
   .object({
@@ -110,6 +111,14 @@ export function SignupForm() {
 
   const router = useRouter();
 
+  const { isAuth, setIsAuth } = useAuth();
+
+  useEffect(() => {
+    if (isAuth) {
+      router.back();
+    }
+  }, []);
+
   const form = useForm<z.infer<typeof RegisterFormSchema>>({
     resolver: zodResolver(RegisterFormSchema),
     defaultValues: {
@@ -147,6 +156,8 @@ export function SignupForm() {
           localStorage.removeItem("user");
           localStorage.setItem("user", JSON.stringify(user as UserType));
 
+          setIsAuth(true);
+
           window.removeEventListener("message", listener);
 
           router.push(targetPath || "/dashboard");
@@ -181,7 +192,13 @@ export function SignupForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      router.push("/auth/login");
+      if (respData.is_publisher) {
+        router.push("/publisher-dashboard");
+      } else {
+        router.push("/user-dashboard");
+      }
+      
+      setIsAuth(true);
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
@@ -215,7 +232,14 @@ export function SignupForm() {
                 Welcome to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Start giving back to the community with Vemer.
+                Start giving back to the community with Vemer. Already have an
+                account?{" "}
+                <Link
+                  className="text-blue-600 hover:text-blue-400 underline"
+                  href="/auth/login"
+                >
+                  Login here
+                </Link>
               </p>
 
               <form className="my-8" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -391,7 +415,7 @@ export function SignupForm() {
                               onClick={() => setIsTocAcceptDialogOpen(true)}
                               className="text-blue-600 hover:text-blue-900"
                             >
-                              Vemer's license and agreement
+                              Vemer&rsquo;s license and agreement
                             </span>
                             .
                           </FormLabel>

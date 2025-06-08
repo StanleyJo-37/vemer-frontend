@@ -3,7 +3,6 @@
 import React from "react";
 import { Input } from "@/components/ui/form-input";
 import type { SocialiteProvider } from "@/types/AuthType";
-import { Airplay, Linkedin } from "lucide-react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,6 +24,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import sso from "@/constants/sso";
+import useAuth from "@/hooks/useAuth";
+import Link from "next/link";
 
 const LoginFormSchema = z.object({
   email: z.string().email().min(1, { message: "Email wajib diisi." }),
@@ -40,6 +41,14 @@ export default function LoginForm() {
   const [ssoProvider, setSsoProvider] = useState<SocialiteProvider>();
 
   const router = useRouter();
+
+  const { isAuth, setIsAuth } = useAuth();
+
+  useEffect(() => {
+    if (isAuth) {
+      router.back();
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof LoginFormSchema>>({
     resolver: zodResolver(LoginFormSchema),
@@ -74,6 +83,8 @@ export default function LoginForm() {
 
           localStorage.removeItem("user");
           localStorage.setItem("user", JSON.stringify(user as UserType));
+
+          setIsAuth(true);
 
           window.removeEventListener("message", listener);
 
@@ -110,10 +121,8 @@ export default function LoginForm() {
       } else {
         router.push("/user-dashboard")
       }
-      if (!respData.profile_completion) {
-        // router.push("/auth/profile-completion");
-        // router.push("/publisher-dashboard")
-      }
+      setIsAuth(true);
+      
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
     } finally {
@@ -132,7 +141,14 @@ export default function LoginForm() {
                 Welcome Back to Vemer
               </h2>
               <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-                Start giving back to the community with Vemer.
+                Start giving back to the community with Vemer. Don't have an
+                account?{" "}
+                <Link
+                  className="text-blue-600 hover:text-blue-400 underline"
+                  href="/auth/register"
+                >
+                  Create a new account here
+                </Link>
               </p>
 
               <form className="my-8" onSubmit={form.handleSubmit(onSubmit)}>

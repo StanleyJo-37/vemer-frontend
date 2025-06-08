@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import ProfilePicture from "./profile-picture";
+import ProfileInfo from "./profile-info";
 
 export interface NavbarProps {
   role: "user" | "unregistered" | "publisher";
@@ -45,7 +46,7 @@ export const Navbar = () => {
           ? "/user-dashboard"
           : user?.role === "publisher"
           ? "/publisher-dashboard"
-          : "/auth/register",
+          : "/auth/login",
     },
   ];
 
@@ -59,10 +60,7 @@ export const Navbar = () => {
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
             {isAuth && user ? (
-              <>
-                <ProfilePicture profilePicturePath={user.profile_photo_path} />
-                <p>{user.name}</p>
-              </>
+              <ProfileInfo user={user} />
             ) : (
               <>
                 <NavbarButton
@@ -105,12 +103,7 @@ export const Navbar = () => {
             ))}
             <div className="flex w-full flex-col gap-4">
               {isAuth && user ? (
-                <>
-                  <ProfilePicture
-                    profilePicturePath={user.profile_photo_path}
-                  />
-                  <p>{user.name}</p>
-                </>
+                <ProfileInfo user={user} />
               ) : (
                 <>
                   <NavbarButton
