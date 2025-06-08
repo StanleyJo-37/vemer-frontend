@@ -3,9 +3,10 @@ import ProfilePicture from "./profile-picture";
 import { Button } from "./ui/button";
 import LucideIcon from "./lucide-icon";
 import { useState } from "react";
+import useAuth from "@/hooks/useAuth";
 
 export default function ProfileInfo({ user }: { user: UserType }) {
-  const [isLoadingLogout, setIsLoadingLogout] = useState<boolean>(false);
+  const { logout, isLoadingLogout } = useAuth();
 
   return (
     <div className="relative">
@@ -19,11 +20,7 @@ export default function ProfileInfo({ user }: { user: UserType }) {
             variant="ghost"
             className="w-full flex flex-row justify-center items-center hover:bg-gray-400 text-red-600"
             disabled={isLoadingLogout}
-            onClick={() => {
-              setIsLoadingLogout(true);
-
-              setIsLoadingLogout(false);
-            }}
+            onClick={logout}
           >
             <LucideIcon icon="PowerOff" />
             <p>Log out</p>

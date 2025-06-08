@@ -456,11 +456,7 @@ export function SignupForm() {
                           <LoadingSpinner />
                         )}
                         <div className="flex flex-row items-center justify-content gap-4">
-                          {idx === 0 ? (
-                            <LucideIcon icon="Mail" size={18} />
-                          ) : (
-                            <LucideIcon icon="Linkedin" size={18} />
-                          )}
+                          <LucideIcon icon={_ssoProvider.iconName} size={18} />
                           <p>{_ssoProvider.label}</p>
                         </div>
                       </Button>
