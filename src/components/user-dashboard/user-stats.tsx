@@ -24,6 +24,7 @@ export function UserStats() {
     badgesEarned: 4,
     pointsToNextLevel: 1500,
     progressToNextLevel: 83.0,
+    level: 1
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
