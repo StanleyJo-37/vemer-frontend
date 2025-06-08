@@ -1,10 +1,17 @@
 import API from "./axios"
 
 const ActivityAPI = {
-    activity_detail: async(acitivity_id : number)=>{
+    activity_detail: async(activity_id : number)=>{
         return API.AuthenticatedAPI.request({
-            url:"/activity/" + acitivity_id,
+            url:"/activity/" + activity_id,
             method: 'GET' 
+        })
+    },
+
+    enroll: async(activity_id: number) => {
+        return API.AuthenticatedAPI.request({
+            url: "/activities/" + activity_id + "/enroll",
+            method: 'POST',
         })
     }
 }

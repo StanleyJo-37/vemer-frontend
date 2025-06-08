@@ -20,6 +20,7 @@ import {
   Award,
 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
+import ActivityAPI from "@/api/ActivityAPI"
 
 // Updated mock data with all events free and simplified join popup
 const mockActivities = [
@@ -259,14 +260,15 @@ export default function ActivityDetailsPage() {
     setIsLoading(false)
   }, [params])
 
-  const handleJoinActivity = () => {
-    if (activity?.joinPopup) {
-      setShowJoinPopup(true)
-    } else {
-      // Direct join without popup
-      setIsJoined(true)
-      alert("Successfully joined the event!")
-    }
+  const handleJoinActivity = async (e: React.FormEvent) => {
+    // if (activity?.joinPopup) {
+    //   setShowJoinPopup(true)
+    // } else {
+    //   // Direct join without popup
+    //   setIsJoined(true)
+    //   alert("Successfully joined the event!")
+    // }
+    const response = await ActivityAPI.enroll(9);
   }
 
   const handleJoinConfirm = () => {
