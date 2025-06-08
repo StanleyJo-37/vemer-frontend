@@ -2,8 +2,8 @@ import API from "./axios"
 
 const ActivityAPI = {
     activity_detail: async(activity_id : number)=>{
-        return API.AuthenticatedAPI.request({
-            url:"/activity/" + activity_id,
+        return API.PublicAPI.request({
+            url:"/activities/" + activity_id,
             method: 'GET' 
         })
     },

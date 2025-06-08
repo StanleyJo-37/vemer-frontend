@@ -16,7 +16,6 @@ import { useCallback, useEffect, useState } from "react";
 import LoadingSpinner from "../loading-spinner";
 import { StatsType } from "@/types/DashboardType";
 import LucideIcon from "../lucide-icon";
-import UserDashboardAPI from "@/api/UserDashboardAPI"
 
 export function UserStats() {
   const [stats, setStats] = useState<StatsType>({
