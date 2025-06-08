@@ -13,6 +13,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/useToast";
 import { NotificationType } from "@/types/NotificationType";
+import UserDashboardAPI from "@/api/UserDashboardAPI";
+import { AxiosError } from "axios";
+import LoadingSpinner from "../loading-spinner";
 
 export default function RecentAnnouncements() {
   const router = useRouter();
@@ -55,6 +58,27 @@ export default function RecentAnnouncements() {
       priority: "low",
     },
   ]);
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const getUpcomingEvents = async () => {
+    setIsLoading(true);
+    try {
+      const resp = await UserDashboardAPI.getRecentAnnouncements({ limit: 3 });
+
+      setAnnouncements(resp.data);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        toast(err.response?.data.message || err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getUpcomingEvents();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {}, 10000);
@@ -125,66 +149,77 @@ export default function RecentAnnouncements() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6">
-        <div className="space-y-3 sm:space-y-4">
-          {announcements.map((announcement) => (
-            <div
-              key={announcement.id}
-              className={`p-3 sm:p-4 border-l-4 rounded-lg border border-gray-200 hover:border-sky-200 transition-colors ${getPriorityColor(
-                announcement.priority
-              )}`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
-                <div className="flex items-center gap-2">
-                  {getTypeIcon(announcement.type)}
-                  <h3 className="font-semibold text-gray-900">
-                    {announcement.title}
-                  </h3>
+      {isLoading ? (
+        <CardContent className="flex flex-row items-center justify-center space-x-4 pt-6">
+          <p>Please Wait...</p>
+          <LoadingSpinner />
+        </CardContent>
+      ) : (
+        <CardContent className="p-4 sm:p-6">
+          <div className="space-y-3 sm:space-y-4">
+            {announcements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className={`p-3 sm:p-4 border-l-4 rounded-lg border border-gray-200 hover:border-sky-200 transition-colors ${getPriorityColor(
+                  announcement.priority
+                )}`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
+                  <div className="flex items-center gap-2">
+                    {getTypeIcon(announcement.type)}
+                    <h3 className="font-semibold text-gray-900">
+                      {announcement.title}
+                    </h3>
+                  </div>
+                  <Badge
+                    className={`${getTypeColor(
+                      announcement.type
+                    )} text-xs cursor-default self-start`}
+                  >
+                    {announcement.type}
+                  </Badge>
                 </div>
-                <Badge
-                  className={`${getTypeColor(
-                    announcement.type
-                  )} text-xs cursor-default self-start`}
-                >
-                  {announcement.type}
-                </Badge>
-              </div>
 
-              <p className="text-sm text-gray-700 mb-3 leading-relaxed">
-                {announcement.message}
-              </p>
+                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                  {announcement.message}
+                </p>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-2">
-                <span className="bg-sky-50 text-sky-700 px-2 py-1 rounded-full cursor-default">
-                  {announcement.activityTitle}
-                </span>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>
-                    {new Date(announcement.publishedAt).toLocaleDateString()} at{" "}
-                    {new Date(announcement.publishedAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-2">
+                  <span className="bg-sky-50 text-sky-700 px-2 py-1 rounded-full cursor-default">
+                    {announcement.activityTitle}
                   </span>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>
+                      {new Date(announcement.publishedAt).toLocaleDateString()}{" "}
+                      at{" "}
+                      {new Date(announcement.publishedAt).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {announcements.length === 0 && (
-          <div className="text-center py-6 sm:py-8">
-            <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No announcements
-            </h3>
-            <p className="text-gray-600">
-              You&rsquo;ll see updates from event organizers here
-            </p>
+            ))}
           </div>
-        )}
-      </CardContent>
+
+          {announcements.length === 0 && (
+            <div className="text-center py-6 sm:py-8">
+              <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No announcements
+              </h3>
+              <p className="text-gray-600">
+                You&rsquo;ll see updates from event organizers here
+              </p>
+            </div>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 }
