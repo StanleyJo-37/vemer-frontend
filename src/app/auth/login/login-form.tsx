@@ -115,14 +115,13 @@ export default function LoginForm() {
 
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
-      
+
       if (respData.is_publisher) {
-        router.push("/publisher-dashboard")
+        router.push("/publisher-dashboard");
       } else {
-        router.push("/user-dashboard")
+        router.push("/user-dashboard");
       }
       setIsAuth(true);
-      
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
     } finally {
