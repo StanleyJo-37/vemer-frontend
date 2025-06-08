@@ -1,16 +1,32 @@
 "use client"
 
+import UserDashboardAPI from "@/api/UserDashboardAPI"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Star, Calendar, Award, TrendingUp } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
 
 export function UserStats() {
-  const stats = {
+
+  const [stats, setStats] = useState({
     totalPoints: 1250,
     eventsAttended: 8,
     badgesEarned: 4,
     nextLevelPoints: 1500,
-  }
+  });
+
+  const getStats = useCallback(async () => {
+    const totalPoints = (await UserDashboardAPI.totalPoints()).data;
+    const eventsAttended = (await UserDashboardAPI.attendedActivities()).data;
+    const badgesEarned = (await UserDashboardAPI.totalPoints()).data;
+    const nextLevelPoints = (await UserDashboardAPI.totalPoints()).data;
+    setStats((prevStats) => ({ ...prevStats, nextLevelPoints, badgesEarned, eventsAttended, totalPoints }));
+  }, []);
+
+  useEffect(() => {
+    getStats();
+  }, [getStats]);
+  
 
   const progressToNextLevel = (stats.totalPoints / stats.nextLevelPoints) * 100
 
