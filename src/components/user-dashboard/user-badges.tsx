@@ -98,8 +98,7 @@ export function UserBadges() {
     setIsLoading(true);
     try {
       const resp = await UserDashboardAPI.getUserBadges({ limit: 4 });
-
-      setUserBadges(resp.data);
+      setUserBadges(resp.data.data);
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
@@ -139,10 +138,10 @@ export function UserBadges() {
           <p>Please Wait...</p>
           <LoadingSpinner />
         </CardContent>
-      ) : (userBadges.length>0 ?(
+      ) : (userBadges.length > 0 ?(
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {...userBadges.map((badge) => (
+            {userBadges.map((badge) => (
               <div
                 key={badge.id}
                 className="relative p-3 sm:p-4 border-2 rounded-lg transition-all duration-200 hover:shadow-md border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50"
