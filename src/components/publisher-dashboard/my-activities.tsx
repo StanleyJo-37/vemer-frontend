@@ -156,17 +156,6 @@ export function MyActivities() {
       activity.category.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleDeleteActivity = (id: string) => {
-    if (confirm("Are you sure you want to delete this activity?")) {
-      setActivities(activities.filter((activity) => activity.id !== id))
-    }
-  }
-
-  const handleUpdateActivity = (updatedActivity: any) => {
-    setActivities(activities.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)))
-    setEditingActivity(null)
-  }
-
   const handleRemoveParticipant = (activityId: string, participantId: string) => {
     setActivities(
       activities.map((activity) => {
@@ -368,14 +357,6 @@ export function MyActivities() {
             {searchQuery ? "Try adjusting your search terms" : "Create your first activity to get started"}
           </p>
         </div>
-      )}
-
-      {editingActivity && (
-        <EditActivityDialog
-          activity={editingActivity}
-          onClose={() => setEditingActivity(null)}
-          onUpdate={handleUpdateActivity}
-        />
       )}
 
       {notificationActivity && (
