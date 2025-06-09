@@ -133,47 +133,48 @@ export function SignupForm() {
 
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (!ssoProvider) return;
+  const ssoLogin = async () => {
+    try {
+      if (!ssoProvider) return;
 
-    const ssoLogin = async () => {
-      try {
-        const resp = await AuthAPI.loginSSO(
-          ssoProvider,
-          pathname,
-          "/user-dashboard"
-        );
+      const resp = await AuthAPI.loginSSO(
+        ssoProvider,
+        pathname,
+        "/user-dashboard"
+      );
 
-        const popup = window.open(
-          resp.data.redirect_url as string,
-          "sso-popup",
-          "width=500,height=600"
-        );
+      const popup = window.open(
+        resp.data.redirect_url as string,
+        "sso-popup",
+        "width=500,height=600"
+      );
 
-        const listener = (event: MessageEvent) => {
-          const { user, targetPath } = event.data;
+      const listener = (event: MessageEvent) => {
+        const { user, targetPath } = event.data;
 
-          localStorage.removeItem("user");
-          localStorage.setItem("user", JSON.stringify(user as UserType));
+        localStorage.removeItem("user");
+        localStorage.setItem("user", JSON.stringify(user as UserType));
 
-          setIsAuth(true);
+        setIsAuth(true);
 
-          window.removeEventListener("message", listener);
+        window.removeEventListener("message", listener);
 
-          router.push(targetPath || "/dashboard");
-          popup?.close();
-        };
+        router.push("auth/confirmation");
 
-        window.addEventListener("message", listener);
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          toast(err.response?.data.message || err.message);
-        }
-      } finally {
-        setSsoProvider(undefined);
+        popup?.close();
+      };
+
+      window.addEventListener("message", listener);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        toast(err.response?.data.message || err.message);
       }
-    };
+    } finally {
+      setSsoProvider(undefined);
+    }
+  };
 
+  useEffect(() => {
     ssoLogin();
   }, [ssoProvider]);
 
@@ -192,11 +193,7 @@ export function SignupForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      if (respData.is_publisher) {
-        router.push("/publisher-dashboard");
-      } else {
-        router.push("/user-dashboard");
-      }
+      router.push("auth/confirmation");
 
       setIsAuth(true);
     } catch (err) {
@@ -368,29 +365,6 @@ export function SignupForm() {
                     />
                   </div>
                 </div>
-                <FormField
-                  disabled={isSubmitLoading}
-                  control={form.control}
-                  name="is_publisher"
-                  render={({ field }) => (
-                    <div className="flex items-center space-x-2 pt-2 mb-5">
-                      <Switch
-                        id="publisher-mode"
-                        checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(checked)}
-                        disabled={field.disabled}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                      <Label
-                        htmlFor="publisher-mode"
-                        className="cursor-pointer"
-                      >
-                        Register as a Publisher
-                      </Label>
-                    </div>
-                  )}
-                />
                 <FormField
                   disabled={isSubmitLoading}
                   control={form.control}

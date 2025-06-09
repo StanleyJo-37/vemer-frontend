@@ -88,7 +88,12 @@ export default function LoginForm() {
 
           window.removeEventListener("message", listener);
 
-          router.push(targetPath || "/dashboard");
+          if ((user as UserType).is_publisher) {
+            router.push("/publisher-dashboard");
+          } else {
+            router.push("/user-dashboard");
+          }
+
           popup?.close();
         };
 
@@ -121,6 +126,7 @@ export default function LoginForm() {
       } else {
         router.push("/user-dashboard");
       }
+
       setIsAuth(true);
     } catch (err) {
       toast("Terjadi kesalahan saat login.");
