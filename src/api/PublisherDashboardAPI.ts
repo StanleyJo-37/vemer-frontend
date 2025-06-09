@@ -229,6 +229,13 @@ const PublisherDashboardAPI = {
     });
   },
 
+  endActivity: async (activity_id: number) => {
+    return API.AuthenticatedAPI.request({
+      url: `/dashboard/publisher/end-activity/${activity_id}`,
+      method: "POST",
+    });
+  },
+
   isPublisher: async (request: NextRequest) => { // It MUST accept `request`
     
     // 1. Extract cookies from the incoming browser request
