@@ -129,12 +129,12 @@ export function UserLeaderboard() {
 
   const loadLeaderboard = useCallback(async () => {
 
-    // try {
-    //   const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
-    //   setLeaderboard(data);
-    // } catch (e) {
-    //   console.error("Failed to load leaderboard:", e);
-    // }
+    try {
+      const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
+      setLeaderboard(data);
+    } catch (e) {
+      console.error("Failed to load leaderboard:", e);
+    }
 
     try {
       const response = await LeaderboardAPI.getTotalActiveUser(categoryFilter);

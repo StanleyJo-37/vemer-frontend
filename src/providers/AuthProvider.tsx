@@ -71,10 +71,10 @@ export default function AuthProvider({
   const logout = async () => {
     setIsLoadingLogout(true);
     try {
-      router.push("/auth/login");
       const resp = AuthAPI.logout();
-
+      
       localStorage.removeItem("user");
+      router.push("/auth/login");
       setIsAuth(false);
     } catch (err) {
       if (err instanceof AxiosError) {
