@@ -20,6 +20,10 @@ export default function UserDashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    if (user?.is_publisher) router.replace("/publisher-dashboard");
+  }, []);
+
+  useEffect(() => {
     if (!isAuth) {
       router.replace("/auth/login");
     }

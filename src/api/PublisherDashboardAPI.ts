@@ -181,16 +181,8 @@ const PublisherDashboardAPI = {
   },
 
   createActivityFull: async (
-    payload: CreateActivityFull
+    formData: FormData
   ): Promise<SuccessResponse> => {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (typeof value === "boolean") {
-        formData.append(key, value ? "1" : "0");
-      } else {
-        formData.append(key, value as string | Blob);
-      }
-    });
 
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/create-activity-popup-badge",
