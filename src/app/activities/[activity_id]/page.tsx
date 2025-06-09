@@ -97,10 +97,8 @@ export default function ActivityDetailsPage() {
     const checkStatus = async () => {
       try {
         const response = await API.AuthenticatedAPI.get("/is-publisher");
-
-        if (response.data.is_publisher) {
-          setIsPublisher(true);
-        }
+        console.log(typeof response.data.is_publisher + response.data.is_publisher)
+        setIsPublisher(response.data.is_publisher);
       } catch (error) {
         console.error("Authorization check failed:", error);
       }

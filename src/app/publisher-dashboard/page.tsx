@@ -12,9 +12,18 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import API from "@/api/axios";
 import useAuth from "@/hooks/useAuth";
+import { useState, useRef, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Plus, Calendar, Bell, Loader2, Shield } from "lucide-react"
+import { CreateActivityForm } from "@/components/publisher-dashboard/create-activity-form"
+import { MyActivities } from "@/components/publisher-dashboard/my-activities"
+import { ActivityNotifications } from "@/components/publisher-dashboard/activity-notifications"
+import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats"
+import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
+import API from "@/api/axios"
 
 const tabs = [
-  { id: "overview", label: "Overview", icon: BarChart3 },
   { id: "activities", label: "My Activities", icon: Calendar },
   { id: "create", label: "Create Activity", icon: Plus },
   { id: "notifications", label: "Notifications", icon: Bell },
@@ -113,14 +122,12 @@ export default function DashboardPage() {
           exit="exit"
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          {activeTab === "overview" && (
-            <div className="space-y-6">
+          {activeTab === "activities" && (
+            <>
               <DashboardStats />
-              <RecentActivityCards />
-            </div>
+              <MyActivities />
+            </>
           )}
-
-          {activeTab === "activities" && <MyActivities />}
           {activeTab === "create" && <CreateActivityForm />}
           {activeTab === "notifications" && <ActivityNotifications />}
         </motion.div>

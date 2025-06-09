@@ -75,8 +75,8 @@ export type CreateActivityFull = Omit<CreateBadgePayload, "activity_id"> & Creat
 
 interface ApproveParticipantPayload {
   activity_id: number;
-  participant_id: number;
-  status: "approved" | "rejected" | "pending";
+  user_id: number;
+  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
 }
 
 interface SuccessResponse {
@@ -187,12 +187,11 @@ const PublisherDashboardAPI = {
       },
     });
   },
-
-  approveParticipant: async (
+  changeParticipantStatus: async (
     payload: ApproveParticipantPayload
   ): Promise<SuccessResponse> => {
     return API.AuthenticatedAPI.request({
-      url: "/dashboard/publisher/approve-participant",
+      url: "/dashboard/publisher/participant-status",
       method: "POST",
       data: payload,
     });
@@ -212,6 +211,27 @@ const PublisherDashboardAPI = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+    });
+  },
+
+  getActivityParticipants: async (activity_id: number) => {
+    return API.AuthenticatedAPI.request({
+      url: `/dashboard/publisher/activity-participants/${activity_id}`,
+      method: "GET"
+    });
+  },
+
+  endActivity: async (activity_id: number) => {
+    return API.AuthenticatedAPI.request({
+      url: `/dashboard/publisher/end-activity/${activity_id}`,
+      method: "POST",
+    });
+  },
+
+  getPublisherStats: async () => {
+    return API.AuthenticatedAPI.request({
+      url: "/dashboard/publisher/stats",
+      method: "GET"
     });
   },
 

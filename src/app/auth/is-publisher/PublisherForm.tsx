@@ -33,7 +33,7 @@ export default function PublisherForm() {
             {isPublisher ? <Megaphone className="w-8 h-8 text-sky-600" /> : <Users className="w-8 h-8 text-sky-600" />}
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Welcome to EventHub</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900">Welcome to Vemer</CardTitle>
             <CardDescription className="text-gray-600 mt-2">
               Let us know how you'd like to use our platform
             </CardDescription>

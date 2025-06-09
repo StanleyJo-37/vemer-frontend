@@ -1,24 +1,43 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Edit, Trash2, Users, Calendar, MapPin, Search, Bell, Eye, CheckCircle, AlertCircle } from "lucide-react"
-import { EditActivityDialog } from "./edit-activity-dialog"
-import { SendNotificationDialog } from "./send-notification-dialog"
-import { ActivityDetailsDialog } from "./activity-details-dialog"
-import { EndEventDialog } from "./end-event-dialog"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Edit,
+  Trash2,
+  Users,
+  Calendar,
+  MapPin,
+  Search,
+  Bell,
+  Eye,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { EditActivityDialog } from "./edit-activity-dialog";
+import { SendNotificationDialog } from "./send-notification-dialog";
+import { ActivityDetailsDialog } from "./activity-details-dialog";
+import { EndEventDialog } from "./end-event-dialog";
 // Import the PendingApplicationsBadge component
-import { PendingApplicationsBadge } from "@/components/publisher-dashboard/pending-applications-badge"
+import { PendingApplicationsBadge } from "@/components/publisher-dashboard/pending-applications-badge";
+import PublisherDashboardAPI from "@/api/PublisherDashboardAPI";
 
 // Mock data for publisher's activities
 const mockPublisherActivities = [
   {
     id: "1",
     title: "Community Garden Cleanup",
-    description: "Join us for a morning of beautifying our local community garden.",
+    description:
+      "Join us for a morning of beautifying our local community garden.",
     category: "Environmental",
     location: "Central Park Community Garden",
     date: "2025-06-15",
@@ -135,93 +154,90 @@ const mockPublisherActivities = [
       },
     ],
   },
-]
+];
 
 // Add a function to count pending applications for each activity
 const getPendingApplicationsCount = (activity: any) => {
-  return activity.participants?.filter((p: any) => p.status === "pending").length || 0
-}
+  return (
+    activity.participants?.filter((p: any) => p.status === "pending").length ||
+    0
+  );
+};
 
 export function MyActivities() {
-  const [activities, setActivities] = useState(mockPublisherActivities)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [editingActivity, setEditingActivity] = useState<any>(null)
-  const [notificationActivity, setNotificationActivity] = useState<any>(null)
-  const [viewingActivity, setViewingActivity] = useState<any>(null)
-  const [endingActivity, setEndingActivity] = useState<any>(null)
+  const [activities, setActivities] = useState(mockPublisherActivities);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editingActivity, setEditingActivity] = useState<any>(null);
+  const [notificationActivity, setNotificationActivity] = useState<any>(null);
+  const [viewingActivity, setViewingActivity] = useState<any>(null);
+  const [endingActivity, setEndingActivity] = useState<any>(null);
 
   const filteredActivities = activities.filter(
     (activity) =>
       activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      activity.category.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      activity.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const handleDeleteActivity = (id: string) => {
-    if (confirm("Are you sure you want to delete this activity?")) {
-      setActivities(activities.filter((activity) => activity.id !== id))
-    }
-  }
-
-  const handleUpdateActivity = (updatedActivity: any) => {
-    setActivities(activities.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)))
-    setEditingActivity(null)
-  }
-
-  const handleRemoveParticipant = (activityId: string, participantId: string) => {
+  const handleRemoveParticipant = (
+    activityId: string,
+    participantId: string
+  ) => {
     setActivities(
       activities.map((activity) => {
         if (activity.id === activityId) {
           return {
             ...activity,
-            participants: activity.participants.filter((p: any) => p.id !== participantId),
+            participants: activity.participants.filter(
+              (p: any) => p.id !== participantId
+            ),
             currentParticipants: activity.currentParticipants - 1,
-          }
+          };
         }
-        return activity
-      }),
-    )
-  }
+        return activity;
+      })
+    );
+  };
 
-  const handleEndEvent = (activityId: string, attendanceData: { [key: string]: boolean }) => {
+  const handleEndEvent = async (
+    activityId: string,
+  ) => {
     setActivities(
       activities.map((activity) => {
         if (activity.id === activityId) {
           return {
             ...activity,
             status: "completed",
-          }
+          };
         }
-        return activity
-      }),
-    )
-    setEndingActivity(null)
-  }
+        return activity;
+      })
+    );
+    setEndingActivity(null);
+
+    await PublisherDashboardAPI.endActivity(Number(9));
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       case "completed":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-sky-100 text-sky-800 border-sky-200"
+        return "bg-sky-100 text-sky-800 border-sky-200";
     }
-  }
-
-  const canEndEvent = (activity: any) => {
-    const eventDate = new Date(activity.date)
-    const today = new Date()
-    return activity.status === "active" && eventDate <= today
-  }
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-sky-900">My Activities</h2>
-          <p className="text-gray-600">Manage and track your published activities</p>
+          <p className="text-gray-600">
+            Manage and track your published activities
+          </p>
         </div>
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -246,23 +262,36 @@ export function MyActivities() {
                 alt={activity.title}
                 className="w-full h-full object-cover"
               />
-              <Badge className={`absolute top-2 right-2 ${getStatusColor(activity.status)}`}>{activity.status}</Badge>
+              <Badge
+                className={`absolute top-2 right-2 ${getStatusColor(
+                  activity.status
+                )}`}
+              >
+                {activity.status}
+              </Badge>
             </div>
             <CardHeader className="flex-shrink-0 pb-3">
               {/* Use the component in the activity card title section */}
               {/* Add this after the activity title in the CardHeader section */}
               <div className="flex items-start justify-between mb-2">
-                <CardTitle className="text-lg text-sky-900 line-clamp-1">{activity.title}</CardTitle>
-                <PendingApplicationsBadge count={getPendingApplicationsCount(activity)} />
+                <CardTitle className="text-lg text-sky-900 line-clamp-1">
+                  {activity.title}
+                </CardTitle>
+                <PendingApplicationsBadge
+                  count={getPendingApplicationsCount(activity)}
+                />
               </div>
-              <CardDescription className="line-clamp-2 h-10">{activity.description}</CardDescription>
+              <CardDescription className="line-clamp-2 h-10">
+                {activity.description}
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col justify-between p-6 pt-0">
               <div className="space-y-2 text-sm text-gray-600 mb-4 px-1">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-sky-600 flex-shrink-0" />
                   <span className="line-clamp-1">
-                    {new Date(activity.date).toLocaleDateString()} at {activity.time}
+                    {new Date(activity.date).toLocaleDateString()} at{" "}
+                    {activity.time}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -272,13 +301,17 @@ export function MyActivities() {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-sky-600 flex-shrink-0" />
                   <span>
-                    {activity.currentParticipants}/{activity.maxParticipants} participants
+                    {activity.currentParticipants}/{activity.maxParticipants}{" "}
+                    participants
                   </span>
                 </div>
                 {getPendingApplicationsCount(activity) > 0 && (
                   <div className="flex items-center gap-2 mt-1 text-sm text-yellow-600">
                     <AlertCircle className="h-4 w-4" />
-                    <span>{getPendingApplicationsCount(activity)} pending applications</span>
+                    <span>
+                      {getPendingApplicationsCount(activity)} pending
+                      applications
+                    </span>
                   </div>
                 )}
               </div>
@@ -286,7 +319,9 @@ export function MyActivities() {
               <div className="space-y-3">
                 {/* Rewards Section */}
                 <div className="bg-sky-50 p-3 rounded-lg border border-sky-200">
-                  <h4 className="text-sm font-semibold text-sky-900 mb-2">Event Rewards</h4>
+                  <h4 className="text-sm font-semibold text-sky-900 mb-2">
+                    Event Rewards
+                  </h4>
                   <div className="space-y-1 text-xs">
                     <div className="flex items-center gap-2">
                       <span className="text-yellow-600">⭐</span>
@@ -340,7 +375,8 @@ export function MyActivities() {
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Button>
-                  {canEndEvent(activity) && (
+                  
+                  {activity.status == "active" &&
                     <Button
                       variant="outline"
                       size="sm"
@@ -350,7 +386,7 @@ export function MyActivities() {
                       <CheckCircle className="h-4 w-4 mr-1" />
                       End Event
                     </Button>
-                  )}
+                  }
                 </div>
               </div>
             </CardContent>
@@ -363,23 +399,22 @@ export function MyActivities() {
           <div className="bg-sky-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <Calendar className="h-8 w-8 text-sky-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No activities found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No activities found
+          </h3>
           <p className="text-gray-600">
-            {searchQuery ? "Try adjusting your search terms" : "Create your first activity to get started"}
+            {searchQuery
+              ? "Try adjusting your search terms"
+              : "Create your first activity to get started"}
           </p>
         </div>
       )}
 
-      {editingActivity && (
-        <EditActivityDialog
-          activity={editingActivity}
-          onClose={() => setEditingActivity(null)}
-          onUpdate={handleUpdateActivity}
-        />
-      )}
-
       {notificationActivity && (
-        <SendNotificationDialog activity={notificationActivity} onClose={() => setNotificationActivity(null)} />
+        <SendNotificationDialog
+          activity={notificationActivity}
+          onClose={() => setNotificationActivity(null)}
+        />
       )}
 
       {viewingActivity && (
@@ -394,9 +429,11 @@ export function MyActivities() {
         <EndEventDialog
           activity={endingActivity}
           onClose={() => setEndingActivity(null)}
-          onEndEvent={(attendanceData) => handleEndEvent(endingActivity.id, attendanceData)}
+          onEndEvent={(attendanceData) =>
+            handleEndEvent(endingActivity.id)
+          }
         />
       )}
     </div>
-  )
+  );
 }
