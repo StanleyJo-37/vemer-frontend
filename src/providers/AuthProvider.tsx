@@ -22,6 +22,20 @@ export default function AuthProvider({
   const [isAuth, setIsAuth] = useState<boolean>(authenticated);
   const router = useRouter();
 
+  const fetchUser = () => {
+    ProfileAPI.me()
+      .then((res) => {
+        setUser(res.data as UserType);
+        localStorage.setItem("user", JSON.stringify(res.data));
+      })
+      .catch((err) => {
+        if (err instanceof AxiosError) {
+          if (err.status === 403) setUser(undefined);
+        }
+      })
+      .finally(() => setIsAuthLoading(false));
+  };
+
   useEffect(() => {
     setIsAuthLoading(true);
 
@@ -31,20 +45,24 @@ export default function AuthProvider({
       if (savedUserProfile) {
         setUser(JSON.parse(savedUserProfile) as UserType);
       } else {
-        ProfileAPI.me()
-          .then((res) => {
-            setUser(res.data as UserType);
-            localStorage.setItem("user", JSON.stringify(res.data));
-          })
-          .catch((err) => {
-            if (err instanceof AxiosError) {
-              if (err.status === 403) setUser(undefined);
-            }
-          })
-          .finally(() => setIsAuthLoading(false));
+        fetchUser();
       }
     }
   }, [isAuth]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!user) {
+      if (storedUser) setUser(JSON.parse(storedUser) as UserType);
+      else {
+        fetchUser();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   const [isLoadingLogout, setIsLoadingLogout] = useState<boolean>(false);
 
@@ -53,10 +71,10 @@ export default function AuthProvider({
   const logout = async () => {
     setIsLoadingLogout(true);
     try {
-      router.push("/auth/login");
       const resp = AuthAPI.logout();
-
+      
       localStorage.removeItem("user");
+      router.push("/auth/login");
       setIsAuth(false);
     } catch (err) {
       if (err instanceof AxiosError) {

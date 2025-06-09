@@ -5,17 +5,23 @@ import { boolean } from "zod";
 import { NextRequest } from "next/server";
 
 interface Activity {
+  points_reward: any;
+  badge: any;
+  image: string;
+  date: string | number | Date;
+  location: string;
+  points: number;
   id: number;
   name: string;
-  slug: string;
-  description: string;
-  what_will_you_get: string;
-  category: string;
-  location: string;
-  point_reward: number;
+  description?: string;
+  activity_type: string;
+  roles?: string | null;
+  badges?: string | null;
+  participant_count?: number;
   start_date: string;
   end_date: string;
-  status: number;
+  slug: string;
+  status: boolean;
 }
 
 interface Notification {
@@ -104,7 +110,7 @@ const PublisherDashboardAPI = {
       method: "GET",
     });
   },
-  getActivities: async (): Promise<Activity[]> => {
+  getActivities: async (): Promise<{data: Activity[]}> => {
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/activities",
       method: "GET",
@@ -175,16 +181,8 @@ const PublisherDashboardAPI = {
   },
 
   createActivityFull: async (
-    payload: CreateActivityFull
+    formData: FormData
   ): Promise<SuccessResponse> => {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (typeof value === "boolean") {
-        formData.append(key, value ? "1" : "0");
-      } else {
-        formData.append(key, value as string | Blob);
-      }
-    });
 
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/create-activity-popup-badge",
@@ -233,6 +231,13 @@ const PublisherDashboardAPI = {
     return API.AuthenticatedAPI.request({
       url: `/dashboard/publisher/end-activity/${activity_id}`,
       method: "POST",
+    });
+  },
+
+  getPublisherStats: async () => {
+    return API.AuthenticatedAPI.request({
+      url: "/dashboard/publisher/stats",
+      method: "GET"
     });
   },
 

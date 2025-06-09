@@ -1,100 +1,66 @@
-"use client"
+"use client";
 
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Calendar, Bell, BarChart3 } from "lucide-react";
+import { CreateActivityForm } from "@/components/publisher-dashboard/create-activity-form";
+import { MyActivities } from "@/components/publisher-dashboard/my-activities";
+import { ActivityNotifications } from "@/components/publisher-dashboard/activity-notifications";
+import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats";
+import { RecentActivityCards } from "@/components/publisher-dashboard/recent-activity-cards";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import API from "@/api/axios";
+import useAuth from "@/hooks/useAuth";
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Calendar, Bell, BarChart3 } from "lucide-react"
+import { Plus, Calendar, Bell, Loader2, Shield } from "lucide-react"
 import { CreateActivityForm } from "@/components/publisher-dashboard/create-activity-form"
 import { MyActivities } from "@/components/publisher-dashboard/my-activities"
 import { ActivityNotifications } from "@/components/publisher-dashboard/activity-notifications"
 import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats"
-import { RecentActivityCards } from "@/components/publisher-dashboard/recent-activity-cards"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import API from "@/api/axios"
 
 const tabs = [
-  { id: "overview", label: "Overview", icon: BarChart3 },
   { id: "activities", label: "My Activities", icon: Calendar },
   { id: "create", label: "Create Activity", icon: Plus },
   { id: "notifications", label: "Notifications", icon: Bell },
-]
+];
 
 export default function DashboardPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview")
-  const [tabDimensions, setTabDimensions] = useState<{ [key: string]: { width: number; left: number } }>({})
-  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({})
-  
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState("overview");
+  const [tabDimensions, setTabDimensions] = useState<{
+    [key: string]: { width: number; left: number };
+  }>({});
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const { user } = useAuth();
+
   useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        const response = await API.AuthenticatedAPI.get('/is-publisher');
-        
-        if (response.data.is_publisher) {
-          setIsAuthorized(true);
-        } else {
-          router.replace('/user-dashboard');
-        }
-      } catch (error) {
-        console.error("Authorization check failed:", error);
-        router.replace('/auth/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    checkStatus();
-  }, [router]);
-
-  // HOOK 2: Calculates tab dimensions after the user is authorized.
-  useEffect(() => {
-    // The logic is now INSIDE the hook, but the hook itself is always called.
-    if (isAuthorized) {
-        const dimensions: { [key: string]: { width: number; left: number } } = {}
-        let cumulativeLeft = 4 
-
-        tabs.forEach((tab) => {
-          const tabElement = tabRefs.current[tab.id]
-          if (tabElement) {
-            const width = tabElement.offsetWidth
-            dimensions[tab.id] = {
-              width: width - 8,
-              left: cumulativeLeft,
-            }
-            cumulativeLeft += width
-          }
-        })
-        setTabDimensions(dimensions)
-    }
-  }, [isAuthorized]); // Reruns when authorization status changes
-
-  // --- CONDITIONAL RETURNS (Now safe because they are AFTER all hooks) ---
-
-  if (isLoading) {
-   return <div>Verifying access...</div>;
-  }
-
-  if (!isAuthorized) {
-    // While the router is redirecting, we can show a message or nothing.
-    return <div>Redirecting...</div>;
-  }
-
+    if (user && !user.is_publisher) router.replace("/user-dashboard");
+  }, []);
 
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
-  }
+  };
 
-  const activeTabDimensions = tabDimensions[activeTab]
+  const activeTabDimensions = tabDimensions[activeTab];
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Publisher Dashboard</h1>
-        <p className="text-gray-600 mt-2">Manage your events and engage with participants</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Publisher Dashboard
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Manage your events and engage with participants
+        </p>
       </div>
 
       {/* Custom Tab Navigation */}
@@ -123,21 +89,25 @@ export default function DashboardPage() {
 
           {/* Tab buttons */}
           {tabs.map((tab) => {
-            const IconComponent = tab.icon
+            const IconComponent = tab.icon;
             return (
               <button
                 key={tab.id}
-                ref={(el) => { tabRefs.current[tab.id] = el; }}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el;
+                }}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 whitespace-nowrap",
-                  activeTab === tab.id ? "text-sky-600" : "text-gray-600 hover:text-gray-900",
+                  activeTab === tab.id
+                    ? "text-sky-600"
+                    : "text-gray-600 hover:text-gray-900"
                 )}
               >
                 <IconComponent className="h-4 w-4 flex-shrink-0" />
                 <span>{tab.label}</span>
               </button>
-            )
+            );
           })}
         </div>
       </div>
@@ -152,18 +122,16 @@ export default function DashboardPage() {
           exit="exit"
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          {activeTab === "overview" && (
-            <div className="space-y-6">
+          {activeTab === "activities" && (
+            <>
               <DashboardStats />
-              <RecentActivityCards />
-            </div>
+              <MyActivities />
+            </>
           )}
-
-          {activeTab === "activities" && <MyActivities />}
           {activeTab === "create" && <CreateActivityForm />}
           {activeTab === "notifications" && <ActivityNotifications />}
         </motion.div>
       </AnimatePresence>
     </div>
-  )
+  );
 }

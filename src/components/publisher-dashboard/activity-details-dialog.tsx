@@ -52,10 +52,24 @@ const PARTICIPANT_STATUS: Array<{
   { value: "rejected", label: "Rejected" },
 ];
 
+type Activity = {
+  id: number;
+  name: string;
+  slug: string;
+  activity_type: string;
+  description: string;
+  // category: string;
+  location: string;
+  points_reward: number;
+  start_date: string;
+  end_date: string;
+  status: boolean;
+};
+
 interface ActivityDetailsDialogProps {
-  activity: any;
+  activity: Activity;
   onClose: () => void;
-  onRemoveParticipant: (activityId: string, participantId: string) => void;
+  onRemoveParticipant: (activityId: number, participantId: string) => void;
 }
 
 export function ActivityDetailsDialog({
@@ -71,14 +85,12 @@ export function ActivityDetailsDialog({
   const [participants, setParticipants] = useState<ParticipantType[]>([]);
   const [loading, setLoading] = useState(true); // Set initial loading state to true
 
-  const activityId = 9;
-
   useEffect(() => {
     const fetchParticipants = async () => {
       setLoading(true); // Set loading to true when starting to fetch
       try {
         const response = await PublisherDashboardAPI.getActivityParticipants(
-          activityId
+          activity.id
         );
         console.log(response.data);
         setParticipants(Object.values(response.data));
@@ -138,7 +150,7 @@ export function ActivityDetailsDialog({
           )
         );
         const payload = {
-          activity_id: Number(activityId),
+          activity_id: Number(activity.id),
           user_id: Number(participantId),
           status: "Confirmed" as "Confirmed",
         };
@@ -159,14 +171,14 @@ export function ActivityDetailsDialog({
           )
         );
         const payload = {
-          activity_id: Number(activityId),
+          activity_id: Number(activity.id),
           user_id: Number(participantId),
           status: "Cancelled" as "Cancelled",
         };
         await PublisherDashboardAPI.changeParticipantStatus(payload);
       }
     },
-    [activityId]
+    [activity.id]
   );
 
   // Function to approve all pending participants
@@ -187,7 +199,7 @@ export function ActivityDetailsDialog({
           p.status === "Pending"
             ? (() => {
                 const payload = {
-                  activity_id: Number(activityId),
+                  activity_id: Number(activity.id),
                   user_id: Number(p.id),
                   status: "Confirmed" as "Confirmed",
                 };
@@ -201,7 +213,7 @@ export function ActivityDetailsDialog({
         `Successfully approved ${pendingParticipants.length} participants!`
       );
     }
-  }, [pendingParticipants, activityId]);
+  }, [pendingParticipants, activity.id]);
 
   const handleReportParticipant = useCallback((participant: any) => {
     setReportingParticipant(participant);
@@ -222,17 +234,9 @@ export function ActivityDetailsDialog({
     setReportDescription("");
   }, [reportReason, reportDescription, reportingParticipant]);
 
-  const getActivityStatusColor = useCallback((status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800 border-green-200 hover:bg-green-100 hover:text-green-800";
-      case "Completed":
-        return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100 hover:text-gray-800";
-      case "Cancelled":
-        return "bg-red-100 text-red-800 border-red-200 hover:bg-red-100 hover:text-red-800";
-      default:
-        return "bg-sky-100 text-sky-800 border-sky-200 hover:bg-sky-100 hover:text-sky-800";
-    }
+  const getActivityStatusColor = useCallback((status: boolean) => {
+    if (status === true) return "bg-green-100 text-green-800 border-green-200";
+    return "bg-gray-100 text-gray-800 border-gray-200";
   }, []);
 
   const getParticipantStatusColor = useCallback((status: string) => {
@@ -272,15 +276,13 @@ export function ActivityDetailsDialog({
     return status.charAt(0).toUpperCase() + status.slice(1);
   }, []);
 
-  const isPaidActivity = !activity.isFree;
-
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden border-sky-100">
           <DialogHeader className="border-b border-sky-100 pb-4">
             <DialogTitle className="text-sky-900 text-xl">
-              {activity.title}
+              {activity.name}
             </DialogTitle>
             <DialogDescription>
               Activity details and participant management
@@ -291,63 +293,43 @@ export function ActivityDetailsDialog({
             {/* Activity Details */}
             <div className="lg:col-span-1 h-full flex flex-col space-y-4 overflow-y-auto pr-2">
               <Card className="flex-1 flex flex-col">
-                <CardHeader className="flex-shrink-0">
-                  <CardTitle className="text-lg">
-                    Activity Information
-                  </CardTitle>
-                </CardHeader>
                 <CardContent className="flex-1 flex flex-col space-y-4">
-                  <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
-                      src={activity.image || "/placeholder.svg"}
-                      alt={activity.title}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="space-y-2 text-sm flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-sky-600" />
+                      <span>
+                        {new Date(activity.start_date).toLocaleDateString()} -{" "}
+                        {new Date(activity.end_date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-sky-600" />
+                      <span>{activity.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-white text-gray-800 border border-sky-200">
+                        {activity.activity_type}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-yellow-600">⭐</span>
+                      <span>{activity.points_reward} points</span>
+                    </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col space-y-3">
-                    <p className="text-sm text-gray-700 flex-shrink-0">
+                  <Badge
+                    className={`${getActivityStatusColor(
+                      activity.status
+                    )} w-fit cursor-default flex-shrink-0`}
+                  >
+                    {activity.status ? "Active" : "Completed"}
+                  </Badge>
+
+                  <div className="mt-4">
+                    <h3 className="font-medium mb-2"></h3>
+                    <p className="text-sm text-gray-600">
                       {activity.description}
                     </p>
-
-                    <div className="space-y-2 text-sm flex-shrink-0">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-sky-600" />
-                        <span>
-                          {new Date(activity.date).toLocaleDateString()} at{" "}
-                          {activity.time}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-sky-600" />
-                        <span>{activity.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-sky-600" />
-                        <span>
-                          {
-                            participants.filter(
-                              (p: any) => p.status === "Confirmed"
-                            ).length
-                          }{" "}
-                          participants
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-sky-600" />
-                        <span>
-                          {activity.isFree ? "Free" : `$${activity.price}`}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Badge
-                      className={`${getActivityStatusColor(
-                        activity.status
-                      )} w-fit cursor-default flex-shrink-0`}
-                    >
-                      {activity.status}
-                    </Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -527,7 +509,7 @@ export function ActivityDetailsDialog({
                               </div>
                             </div>
                             <div className="flex items-center gap-2 mt-2 md:mt-0 w-full md:w-auto justify-end">
-                              {activity.status === "active" &&
+                              {activity.status === true &&
                                 participant.status === "Pending" && (
                                   <>
                                     <Button
@@ -558,7 +540,7 @@ export function ActivityDetailsDialog({
                                     </Button>
                                   </>
                                 )}
-                              {activity.status === "active" && (
+                              {activity.status === true && (
                                 <>
                                   <Button
                                     variant="outline"
@@ -570,7 +552,7 @@ export function ActivityDetailsDialog({
                                   >
                                     <Flag className="h-4 w-4" />
                                   </Button>
-                                  <Button
+                                  {/* <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() =>
@@ -582,7 +564,7 @@ export function ActivityDetailsDialog({
                                     className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                   >
                                     <UserMinus className="h-4 w-4" />
-                                  </Button>
+                                  </Button> */}
                                 </>
                               )}
                             </div>

@@ -23,9 +23,10 @@ import {
 } from "lucide-react";
 import { ParticipantType } from "@/types/ParticipantType";
 import PublisherDashboardAPI from "@/api/PublisherDashboardAPI";
+import { Activity } from "@/app/activities/page";
 
 interface EndEventDialogProps {
-  activity: any;
+  activity: Activity;
   onClose: () => void;
   onEndEvent: (attendanceData: { [key: string]: boolean }) => void;
 }
@@ -40,8 +41,6 @@ export function EndEventDialog({
   const [participants, setParticipants] = useState<ParticipantType[]>([]);
   const [loading, setLoading] = useState(true); // <-- Add loading state
 
-  const activityId = 9;
-
   const handleAttendanceChange = (participantId: string, attended: boolean) => {
     setAttendance((prev) => ({
       ...prev,
@@ -54,7 +53,7 @@ export function EndEventDialog({
       setLoading(true); // Set loading to true when starting to fetch
       try {
         const response = await PublisherDashboardAPI.getActivityParticipants(
-          activityId
+          activity.id
         );
         // Only include participants with status "Completed" (case-insensitive)
         const filtered = Object.values(response.data).filter(
@@ -80,10 +79,12 @@ export function EndEventDialog({
     const attendedCount = Object.values(attendance).filter(Boolean).length;
     alert(
       `Event ended! ${attendedCount} participants attended and received ${
-        activity.points
+        activity.points_reward
       } points${activity.badge ? " and a badge" : ""}.`
     );
 
+    await PublisherDashboardAPI.endActivity(activity.id);
+    
     onEndEvent(attendance);
     setIsSubmitting(false);
   };
@@ -97,7 +98,7 @@ export function EndEventDialog({
         <DialogHeader className="border-b border-sky-100 pb-4">
           <DialogTitle className="text-sky-900 text-xl flex items-center gap-2">
             <CheckCircle className="h-6 w-6 text-green-600" />
-            End Event: {activity.title}
+            End Event: {activity.name}
           </DialogTitle>
           <DialogDescription>
             Mark attendance for participants to award points and badges
@@ -117,7 +118,7 @@ export function EndEventDialog({
                 <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
                   <img
                     src={activity.image || "/placeholder.svg"}
-                    alt={activity.title}
+                    alt={activity.name}
                     className="w-full h-full object-cover"
                   />
                 </div>

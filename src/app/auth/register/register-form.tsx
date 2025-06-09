@@ -159,7 +159,7 @@ export function SignupForm() {
 
         window.removeEventListener("message", listener);
 
-        router.push("auth/confirmation");
+        router.push("/auth/is-publisher");
 
         popup?.close();
       };
@@ -193,7 +193,7 @@ export function SignupForm() {
       localStorage.removeItem("user");
       localStorage.setItem("user", JSON.stringify(respData));
 
-      router.push("auth/confirmation");
+      router.push("/auth/is-publisher");
 
       setIsAuth(true);
     } catch (err) {

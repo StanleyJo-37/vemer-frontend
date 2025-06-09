@@ -41,12 +41,7 @@ export const Navbar = () => {
     },
     {
       name: "Dashboard",
-      link:
-        user?.role === "volunteer"
-          ? "/user-dashboard"
-          : user?.role === "publisher"
-          ? "/publisher-dashboard"
-          : "/auth/login",
+      link: user?.is_publisher ? "/publisher-dashboard" : "/user-dashboard",
     },
   ];
 
