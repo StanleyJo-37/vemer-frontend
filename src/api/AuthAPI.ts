@@ -21,8 +21,8 @@ const AuthAPI = {
     });
   },
   handleIsPublisher: async(data: boolean) => {
-    return await API.PublicAPI.request({
-      url: "/auth/is-publisher",
+    return await API.AuthenticatedAPI.request({
+      url: "/is-publisher",
       method: "POST",
       data: { 
         is_publisher: data
