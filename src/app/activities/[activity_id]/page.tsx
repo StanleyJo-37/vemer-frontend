@@ -1,11 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { JoinEventPopup } from "@/components/join-event-popup"
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { JoinEventPopup } from "@/components/join-event-popup";
 import {
   Calendar,
   MapPin,
@@ -18,14 +24,14 @@ import {
   CheckCircle,
   Star,
   Award,
-} from "lucide-react"
-import { useRouter, useParams } from "next/navigation"
-import { RegistrationStatus } from "@/types/StatusTypes"
-import ActivityAPI from "@/api/ActivityAPI"
+} from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
+import { RegistrationStatus } from "@/types/StatusTypes";
+import ActivityAPI from "@/api/ActivityAPI";
 
 // Helper function to parse benefits into sentences
 const parseBenefits = (benefits: string): string[] => {
-  if (!benefits) return []
+  if (!benefits) return [];
 
   const sentences = benefits
     .split(/[.!]\s+|[\n\r]+/)
@@ -33,43 +39,44 @@ const parseBenefits = (benefits: string): string[] => {
     .filter((sentence) => sentence.length > 0)
     .map((sentence) => {
       if (!/[.!?]$/.test(sentence)) {
-        return sentence + "."
+        return sentence + ".";
       }
-      return sentence
-    })
+      return sentence;
+    });
 
-  return sentences
-}
+  return sentences;
+};
 
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
     case "Common":
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
     case "Uncommon":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-green-100 text-green-800 border-green-200";
     case "Rare":
-      return "bg-sky-100 text-sky-800 border-sky-200"
+      return "bg-sky-100 text-sky-800 border-sky-200";
     case "Epic":
-      return "bg-purple-100 text-purple-800 border-purple-200"
+      return "bg-purple-100 text-purple-800 border-purple-200";
     case "Legendary":
-      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
+      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
-}
+};
 
 export default function ActivityDetailsPage() {
-  const router = useRouter()
-  const params = useParams()
+  const router = useRouter();
+  const params = useParams();
   const [activity, setActivity] = useState<any>({});
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   const [canJoin, setCanJoin] = useState(false);
-  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus>("Unregistered");
-  const [showJoinPopup, setShowJoinPopup] = useState(false)
+  const [registrationStatus, setRegistrationStatus] =
+    useState<RegistrationStatus>("Unregistered");
+  const [showJoinPopup, setShowJoinPopup] = useState(false);
 
   const handleRender = useCallback(async () => {
     setIsLoading(true);
-    const activity_id = Number(params?.activity_id)
+    const activity_id = Number(params?.activity_id);
     const status: string = (await ActivityAPI.getStatus(activity_id)).data;
     setRegistrationStatus(status as RegistrationStatus);
 
@@ -81,11 +88,10 @@ export default function ActivityDetailsPage() {
 
   useEffect(() => {
     // Get the ID from the URL using useParams
-    
+
     handleRender();
     setIsLoading(false);
-  }, [params, handleRender])
-
+  }, [params, handleRender]);
 
   const handleJoinActivity = async (e: React.FormEvent) => {
     if (activity?.joinPopup) {
@@ -93,21 +99,21 @@ export default function ActivityDetailsPage() {
     } else {
       setCanJoin(false);
       // Direct join without popup
-      alert("Successfully joined the event!")
+      alert("Successfully joined the event!");
       const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
       await handleRender();
       setCanJoin(true);
     }
-  }
-  
+  };
+
   const handleJoinConfirm = async () => {
     setCanJoin(false);
-    setShowJoinPopup(false)
-    alert("Successfully joined the event!")
+    setShowJoinPopup(false);
+    alert("Successfully joined the event!");
     const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
     await handleRender();
     setCanJoin(true);
-  }
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -115,12 +121,12 @@ export default function ActivityDetailsPage() {
         title: activity.title,
         text: activity.description,
         url: window.location.href,
-      })
+      });
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert("Link copied to clipboard!")
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -132,30 +138,43 @@ export default function ActivityDetailsPage() {
           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!activity) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Activity Not Found</h1>
-          <p className="text-gray-600 mb-2">The activity with ID "{params?.activity_id}" doesn't exist.</p>
-          <Button onClick={() => router.push("/activities")} className="bg-sky-600 hover:bg-sky-700">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Activity Not Found
+          </h1>
+          <p className="text-gray-600 mb-2">
+            The activity with ID "{params?.activity_id}" doesn't exist.
+          </p>
+          <Button
+            onClick={() => router.push("/activities")}
+            className="bg-sky-600 hover:bg-sky-700"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Activities
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
-  const benefitsList = activity.benefits ? parseBenefits(activity.benefits) : []
+  const benefitsList = activity.benefits
+    ? parseBenefits(activity.benefits)
+    : [];
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="mb-4 sm:mb-6">
-        <Button variant="ghost" onClick={() => router.back()} className="mb-4 hover:bg-sky-50">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="mb-4 hover:bg-sky-50"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
@@ -177,8 +196,13 @@ export default function ActivityDetailsPage() {
           <div>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{activity.title}</h1>
-                <Badge variant="secondary" className="mb-4 bg-sky-100 text-sky-800">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                  {activity.title}
+                </h1>
+                <Badge
+                  variant="secondary"
+                  className="mb-4 bg-sky-100 text-sky-800"
+                >
                   {activity.category}
                 </Badge>
               </div>
@@ -196,14 +220,20 @@ export default function ActivityDetailsPage() {
             <div className="space-y-4 sm:space-y-6">
               {/* About This Event */}
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">About This Event</h2>
-                <p className="text-gray-700 leading-relaxed">{activity.description}</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                  About This Event
+                </h2>
+                <p className="text-gray-700 leading-relaxed">
+                  {activity.description}
+                </p>
               </div>
 
               {/* What Will You Get */}
               {benefitsList.length > 0 && (
                 <div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">What Will You Get?</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                    What Will You Get?
+                  </h2>
                   <ul className="space-y-2">
                     {benefitsList.map((benefit, index) => (
                       <li key={index} className="flex items-start gap-3">
@@ -217,7 +247,9 @@ export default function ActivityDetailsPage() {
 
               {/* Rewards Section */}
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Event Rewards</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                  Event Rewards
+                </h2>
                 <div className="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-lg p-4">
                   <div className="space-y-3">
                     {/* Points */}
@@ -226,8 +258,12 @@ export default function ActivityDetailsPage() {
                         <Star className="h-5 w-5 text-yellow-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">Earn {activity.points} Points</p>
-                        <p className="text-sm text-gray-600">Points will be awarded upon event completion</p>
+                        <p className="font-semibold text-gray-900">
+                          Earn {activity.points} Points
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Points will be awarded upon event completion
+                        </p>
                       </div>
                     </div>
 
@@ -239,12 +275,20 @@ export default function ActivityDetailsPage() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-gray-900">Unlock "{activity.badge.name}" Badge</p>
-                            <Badge className={`${getRarityColor(activity.badge.rarity)} text-xs cursor-default`}>
+                            <p className="font-semibold text-gray-900">
+                              Unlock "{activity.badge.name}" Badge
+                            </p>
+                            <Badge
+                              className={`${getRarityColor(
+                                activity.badge.rarity
+                              )} text-xs cursor-default`}
+                            >
                               {activity.badge.rarity}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600">{activity.badge.description}</p>
+                          <p className="text-sm text-gray-600">
+                            {activity.badge.description}
+                          </p>
                         </div>
                         <div className="text-2xl">{activity.badge.icon}</div>
                       </div>
@@ -257,7 +301,9 @@ export default function ActivityDetailsPage() {
             {/* Organizer Info */}
             <Card className="mt-6 border-sky-100">
               <CardHeader>
-                <CardTitle className="text-lg text-sky-900">Organized by</CardTitle>
+                <CardTitle className="text-lg text-sky-900">
+                  Organized by
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
@@ -280,20 +326,57 @@ export default function ActivityDetailsPage() {
           {/* Join Card */}
           <Card className="border-sky-200">
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl text-sky-900">Join This Activity</CardTitle>
-              <CardDescription>Be part of making a positive impact in your community</CardDescription>
+              <CardTitle className="text-lg sm:text-xl text-sky-900">
+                Join This Activity
+              </CardTitle>
+              <CardDescription>
+                Be part of making a positive impact in your community
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-2xl sm:text-3xl font-bold text-green-600">Free</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
+                Free
+              </div>
 
               <Button
-                className={`w-full ${ (['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) || !canJoin ? "bg-sky-100 text-sky-700 border-sky-200" : ( registrationStatus === "Unregistered" as RegistrationStatus ? "bg-sky-600 hover:bg-sky-700" : "bg-red-500 hover:bg-red-300")}`}
+                className={`w-full ${
+                  (
+                    [
+                      "Pending",
+                      "Completed",
+                      "Confirmed",
+                    ] as RegistrationStatus[]
+                  ).includes(registrationStatus) || !canJoin
+                    ? "bg-sky-100 text-sky-700 border-sky-200"
+                    : registrationStatus ===
+                      ("Unregistered" as RegistrationStatus)
+                    ? "bg-sky-600 hover:bg-sky-700"
+                    : "bg-red-500 hover:bg-red-300"
+                }`}
                 onClick={handleJoinActivity}
-                variant={ (['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) ? "outline" : "default"}
-                disabled={(['Pending', 'Completed', 'Confirmed'] as RegistrationStatus[]).includes(registrationStatus) || !canJoin}
+                variant={
+                  (
+                    [
+                      "Pending",
+                      "Completed",
+                      "Confirmed",
+                    ] as RegistrationStatus[]
+                  ).includes(registrationStatus)
+                    ? "outline"
+                    : "default"
+                }
+                disabled={
+                  (
+                    [
+                      "Pending",
+                      "Completed",
+                      "Confirmed",
+                    ] as RegistrationStatus[]
+                  ).includes(registrationStatus) || !canJoin
+                }
               >
-                { canJoin ?
-                  (() => {
+                {canJoin
+                  ? (() => {
                       switch (registrationStatus) {
                         case "Pending":
                           return (
@@ -328,14 +411,14 @@ export default function ActivityDetailsPage() {
                         default:
                           return "Join Activity";
                       }
-                  })()
-                :
-                  "Wait ..."
-                }
+                    })()
+                  : "Wait ..."}
               </Button>
 
               <div className="text-sm text-gray-600 text-center">
-                {registrationStatus != "Unregistered" ? "You're registered for this activity!" : "Click to register for this activity"}
+                {registrationStatus != "Unregistered"
+                  ? "You're registered for this activity!"
+                  : "Click to register for this activity"}
               </div>
             </CardContent>
           </Card>
@@ -349,7 +432,9 @@ export default function ActivityDetailsPage() {
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-sky-600" />
                 <div>
-                  <p className="font-medium">{new Date(activity.date).toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    {new Date(activity.date).toLocaleDateString()}
+                  </p>
                   <p className="text-sm text-gray-600">Date</p>
                 </div>
               </div>
@@ -374,7 +459,8 @@ export default function ActivityDetailsPage() {
                 <Users className="h-5 w-5 text-sky-600" />
                 <div>
                   <p className="font-medium">
-                    {activity.maxParticipants - activity.currentParticipants} spots available
+                    {activity.maxParticipants - activity.currentParticipants}{" "}
+                    spots available
                   </p>
                   <p className="text-sm text-gray-600">Capacity</p>
                 </div>
@@ -402,8 +488,12 @@ export default function ActivityDetailsPage() {
               <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
                 <Star className="h-5 w-5 text-yellow-500" />
                 <div>
-                  <p className="font-semibold text-gray-900">{activity.points} Points</p>
-                  <p className="text-xs text-gray-600">Awarded upon completion</p>
+                  <p className="font-semibold text-gray-900">
+                    {activity.points} Points
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Awarded upon completion
+                  </p>
                 </div>
               </div>
 
@@ -411,8 +501,14 @@ export default function ActivityDetailsPage() {
                 <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
                   <div className="text-xl">{activity.badge.icon}</div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{activity.badge.name}</p>
-                    <Badge className={`${getRarityColor(activity.badge.rarity)} text-xs cursor-default mt-1`}>
+                    <p className="font-semibold text-gray-900">
+                      {activity.badge.name}
+                    </p>
+                    <Badge
+                      className={`${getRarityColor(
+                        activity.badge.rarity
+                      )} text-xs cursor-default mt-1`}
+                    >
                       {activity.badge.rarity}
                     </Badge>
                   </div>
@@ -454,9 +550,10 @@ export default function ActivityDetailsPage() {
       <JoinEventPopup
         isOpen={showJoinPopup}
         onClose={() => setShowJoinPopup(false)}
-        onJoin={handleJoinConfirm}
+        status={registrationStatus}
         activity={activity}
+        onJoin={handleJoinConfirm}
       />
     </div>
-  )
+  );
 }
