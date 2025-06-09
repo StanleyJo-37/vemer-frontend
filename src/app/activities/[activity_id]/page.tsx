@@ -113,7 +113,7 @@ export default function ActivityDetailsPage() {
       setCanJoin(false);
       // Direct join without popup
       alert("Successfully joined the event!");
-      const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
+      const response = await ActivityAPI.enroll(Number(params?.activity_id));
       await handleRender();
       setCanJoin(true);
     }
@@ -123,7 +123,7 @@ export default function ActivityDetailsPage() {
     setCanJoin(false);
     setShowJoinPopup(false);
     alert("Successfully joined the event!");
-    const response = await ActivityAPI.enroll(Number(params?.activity_id[0]));
+    const response = await ActivityAPI.enroll(Number(params?.activity_id));
     await handleRender();
     setCanJoin(true);
   };

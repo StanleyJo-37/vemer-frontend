@@ -15,6 +15,12 @@ import API from "@/api/axios";
 
 // Define activity types
 export type Activity = {
+  points_reward: any;
+  badge: any;
+  image: string;
+  date: string | number | Date;
+  location: string;
+  points: number;
   id: number;
   name: string;
   description?: string;
@@ -25,6 +31,7 @@ export type Activity = {
   start_date: string;
   end_date: string;
   slug: string;
+  status: boolean;
 };
 
 export default function ActivitiesPage() {

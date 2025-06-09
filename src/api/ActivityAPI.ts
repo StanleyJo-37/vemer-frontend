@@ -16,7 +16,7 @@ const ActivityAPI = {
   },
 
   getStatus: async (activity_id: number) => {
-    return API.PublicAPI.request({
+    return API.AuthenticatedAPI.request({
       url: "/activities/" + activity_id + "/get-status",
       method: "GET",
     });

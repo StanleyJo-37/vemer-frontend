@@ -5,17 +5,23 @@ import { boolean } from "zod";
 import { NextRequest } from "next/server";
 
 interface Activity {
+  points_reward: any;
+  badge: any;
+  image: string;
+  date: string | number | Date;
+  location: string;
+  points: number;
   id: number;
   name: string;
-  slug: string;
-  description: string;
-  what_will_you_get: string;
-  category: string;
-  location: string;
-  point_reward: number;
+  description?: string;
+  activity_type: string;
+  roles?: string | null;
+  badges?: string | null;
+  participant_count?: number;
   start_date: string;
   end_date: string;
-  status: number;
+  slug: string;
+  status: boolean;
 }
 
 interface Notification {
@@ -104,7 +110,7 @@ const PublisherDashboardAPI = {
       method: "GET",
     });
   },
-  getActivities: async (): Promise<Activity[]> => {
+  getActivities: async (): Promise<{data: Activity[]}> => {
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/activities",
       method: "GET",

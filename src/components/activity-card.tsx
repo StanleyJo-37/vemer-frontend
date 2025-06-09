@@ -14,36 +14,22 @@ import { useRouter } from "next/navigation";
 import { Activity } from "@/app/activities/page";
 import { useEffect, useState } from "react";
 import API from "@/api/axios";
+import useAuth from "@/hooks/useAuth";
 
 // Accepts Activity as a prop type
 export function ActivityCard({ activity }: { activity: Activity }) {
   const router = useRouter();
+  const isAuth = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  useEffect(() => {
-    const checkUserStatus = async () => {
-      try {
-        const response = await API.AuthenticatedAPI.get("/is-publisher");
-        if (response.data.is_publisher) {
-          router.replace("/publisher-dashboard");
-        } else {
-          setIsAuthorized(true);
-        }
-      } catch (error) {
-        // Not logged in
-        setIsAuthorized(false);
-      }
-    };
-    checkUserStatus();
-  }, [router]);
-
   const handleViewDetails = () => {
-    if (!isAuthorized) {
+    if (!isAuth.isAuthenticated) {
       router.push("/auth/login");
       return;
     }
     if (activity.id) {
       router.push(`/activities/${activity.id}`);
+      return;
     }
   };
 
