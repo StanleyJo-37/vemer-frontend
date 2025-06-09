@@ -158,9 +158,11 @@ export function SignupForm() {
 
           setIsAuth(true);
 
+          router.push("/is-publisher");
+
           window.removeEventListener("message", listener);
 
-          router.push(targetPath || "/dashboard");
+          // router.push(targetPath || "/dashboard");
           popup?.close();
         };
 
@@ -368,29 +370,6 @@ export function SignupForm() {
                     />
                   </div>
                 </div>
-                <FormField
-                  disabled={isSubmitLoading}
-                  control={form.control}
-                  name="is_publisher"
-                  render={({ field }) => (
-                    <div className="flex items-center space-x-2 pt-2 mb-5">
-                      <Switch
-                        id="publisher-mode"
-                        checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(checked)}
-                        disabled={field.disabled}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                      <Label
-                        htmlFor="publisher-mode"
-                        className="cursor-pointer"
-                      >
-                        Register as a Publisher
-                      </Label>
-                    </div>
-                  )}
-                />
                 <FormField
                   disabled={isSubmitLoading}
                   control={form.control}

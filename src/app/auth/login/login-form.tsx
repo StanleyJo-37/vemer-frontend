@@ -84,11 +84,13 @@ export default function LoginForm() {
           localStorage.removeItem("user");
           localStorage.setItem("user", JSON.stringify(user as UserType));
 
+          router.push("/auth/is-publisher");
+
           setIsAuth(true);
 
           window.removeEventListener("message", listener);
 
-          router.push(targetPath || "/dashboard");
+          // router.push(targetPath || "/dashboard");
           popup?.close();
         };
 

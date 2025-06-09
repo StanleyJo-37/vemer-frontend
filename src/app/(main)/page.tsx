@@ -17,9 +17,25 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import API from "@/api/axios";
+import { useEffect } from "react";
+
+const initializeSanctum = async () => {
+  try {
+    console.log("Initializing Sanctum handshake...");
+    await API.RegularAPI.get('/sanctum/csrf-cookie');
+    console.log("Sanctum handshake complete!");
+  } catch (error) {
+    console.error("Error during Sanctum handshake:", error);
+  }
+};
 
 export default function Page() {
   const words = ["sharing", "serving", "contributing", "supporting"];
+
+  useEffect(() => {
+    initializeSanctum();
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full font-[family-name:var(--font-geist-sans)] !m-0 relative">

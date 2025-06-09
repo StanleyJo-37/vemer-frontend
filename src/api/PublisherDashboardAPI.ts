@@ -2,6 +2,7 @@ import { extend } from "lodash";
 import API from "./axios";
 import { UserFormat } from "@/components/leaderboard";
 import { boolean } from "zod";
+import { NextRequest } from "next/server";
 
 interface Activity {
   id: number;
@@ -222,11 +223,31 @@ const PublisherDashboardAPI = {
     });
   },
 
-  isPublisher: async (): Promise<SuccessResponse> => {
-    return API.AuthenticatedAPI.request({
-      url: "/is-publisher",
-      method: "GET",
-    });
+  isPublisher: async (request: NextRequest) => { // It MUST accept `request`
+    
+    // 1. Extract cookies from the incoming browser request
+    const sessionToken = request.cookies.get('vemer_token')?.value;
+    const xsrfToken = request.cookies.get('XSRF-TOKEN')?.value;
+
+    // This is a critical debugging step:
+    console.log('[isPublisher] Forwarding session token:', !!sessionToken); // Should be true
+    console.log('[isPublisher] Forwarding XSRF token:', !!xsrfToken);     // Should be true
+
+    // If either token is missing, we can't authenticate
+    if (!sessionToken || !xsrfToken) {
+      throw new Error("Missing authentication tokens for server-side request.");
+    }
+
+    // 2. Manually build the headers for the outgoing request to Laravel
+    const headers = {
+      'Cookie': `vemer_token=${sessionToken}; XSRF-TOKEN=${xsrfToken}`,
+      'X-XSRF-TOKEN': xsrfToken,
+    };
+
+    console.log('[isPublisher] Sending request to Laravel with these headers:', headers);
+
+    // 3. Make the API call with the constructed headers
+    return API.AuthenticatedAPI.get('/is-publisher', { headers });
   },
 };
 
