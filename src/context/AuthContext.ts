@@ -3,7 +3,9 @@ import { createContext } from "react";
 
 const AuthContext = createContext<AuthContextType>({
   setIsAuth: (newAuth: boolean) => {},
-  logout: async () => {},
+  logout: async () => {
+    
+  },
 });
 
 export default AuthContext;

@@ -20,6 +20,15 @@ const AuthAPI = {
       data,
     });
   },
+  handleIsPublisher: async(data: boolean) => {
+    return await API.PublicAPI.request({
+      url: "/auth/is-publisher",
+      method: "POST",
+      data: { 
+        is_publisher: data
+      },
+    })
+  },
   loginSSO: async (
     provider: SocialiteProvider,
     web_origin: string,
