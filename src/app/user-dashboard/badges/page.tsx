@@ -31,7 +31,7 @@ const allBadges: BadgeType[] = [
     id: 1,
     badge_name: "Green Warrior",
     description: "Participated in 10+ environmental activities",
-    image_url: "", // Placeholder, replace with actual image URL
+    image: "", // Placeholder, replace with actual image URL
     category_name: "Environmental",
     created_at: "2025-05-15T10:00:00Z", // Placeholder
     favourite: true,
@@ -40,7 +40,7 @@ const allBadges: BadgeType[] = [
     id: 2,
     badge_name: "Community Helper",
     description: "Volunteered 50+ hours in community service",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Community Service",
     created_at: "2025-06-01T14:30:00Z", // Placeholder
     favourite: true,
@@ -49,7 +49,7 @@ const allBadges: BadgeType[] = [
     id: 3,
     badge_name: "Early Bird",
     description: "Joined 5 events before 9 AM",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Achievement",
     created_at: "2025-06-10T08:00:00Z", // Placeholder
     favourite: false,
@@ -58,7 +58,7 @@ const allBadges: BadgeType[] = [
     id: 4,
     badge_name: "Team Player",
     description: "Worked with 100+ different volunteers",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Social",
     created_at: "2025-06-12T16:45:00Z", // Placeholder
     favourite: false,
@@ -67,7 +67,7 @@ const allBadges: BadgeType[] = [
     id: 5,
     badge_name: "Education Champion",
     description: "Lead 5 educational workshops",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Education",
     created_at: "2025-01-01T00:00:00Z", // Placeholder
     favourite: false,
@@ -76,7 +76,7 @@ const allBadges: BadgeType[] = [
     id: 6,
     badge_name: "Art Enthusiast",
     description: "Participated in 3 arts & culture events",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Arts & Culture",
     created_at: "2025-01-01T00:00:00Z", // Placeholder
     favourite: true,
@@ -85,7 +85,7 @@ const allBadges: BadgeType[] = [
     id: 7,
     badge_name: "Night Owl",
     description: "Participated in 3 evening events",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Achievement",
     created_at: "2025-01-01T00:00:00Z", // Placeholder
     favourite: false,
@@ -94,7 +94,7 @@ const allBadges: BadgeType[] = [
     id: 8,
     badge_name: "Marathon Volunteer",
     description: "Volunteered for 8+ hours in a single day",
-    image_url: "", // Placeholder
+    image: "", // Placeholder
     category_name: "Achievement",
     created_at: "2025-01-01T00:00:00Z", // Placeholder
     favourite: false,
@@ -106,7 +106,7 @@ type BadgeType = {
   badge_name: string,
   created_at: string,
   description: string,
-  image_url: string,
+  image: string,
   category_name: string,
   favourite: boolean
 }
@@ -242,7 +242,7 @@ export default function BadgesPage() {
               <CardContent className="p-4 sm:p-6 text-center">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3">
                   <Image
-                    src={badge.image_url || "/placeholder-badge.png"}
+                    src={badge.image || "/public/images/placeholder.svg"}
                     alt={badge.badge_name}
                     layout="fill"
                     objectFit="contain"

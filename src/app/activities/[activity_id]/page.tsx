@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, act } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +29,8 @@ import { useRouter, useParams } from "next/navigation";
 import { RegistrationStatus } from "@/types/StatusTypes";
 import ActivityAPI from "@/api/ActivityAPI";
 import API from "@/api/axios";
+import { ActivityPayload } from "@/api/ActivityAPI";
+import Image from "next/image";
 
 // Helper function to parse benefits into sentences
 const parseBenefits = (benefits: string): string[] => {
@@ -48,27 +50,10 @@ const parseBenefits = (benefits: string): string[] => {
   return sentences;
 };
 
-const getRarityColor = (rarity: string) => {
-  switch (rarity) {
-    case "Common":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    case "Uncommon":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "Rare":
-      return "bg-sky-100 text-sky-800 border-sky-200";
-    case "Epic":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "Legendary":
-      return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
-
 export default function ActivityDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const [activity, setActivity] = useState<any>({});
+  const [activity, setActivity] = useState<ActivityPayload|undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [canJoin, setCanJoin] = useState(false);
   const [isPublisher, setIsPublisher] = useState(true);
@@ -97,17 +82,15 @@ export default function ActivityDetailsPage() {
     const checkStatus = async () => {
       try {
         const response = await API.AuthenticatedAPI.get("/is-publisher");
-        console.log(typeof response.data.is_publisher + response.data.is_publisher)
           setIsPublisher(response.data.is_publisher);
       } catch (error) {
-        console.error("Authorization check failed:", error);
       }
     };
     checkStatus();
   }, []);
 
   const handleJoinActivity = async (e: React.FormEvent) => {
-    if (activity?.joinPopup) {
+    if (activity?.popup_info) {
       setShowJoinPopup(true);
     } else {
       setCanJoin(false);
@@ -131,8 +114,8 @@ export default function ActivityDetailsPage() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: activity.title,
-        text: activity.description,
+        title: activity?.name,
+        text: activity?.description,
         url: window.location.href,
       });
     } else {
@@ -176,10 +159,6 @@ export default function ActivityDetailsPage() {
     );
   }
 
-  const benefitsList = activity.benefits
-    ? parseBenefits(activity.benefits)
-    : [];
-
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="mb-4 sm:mb-6">
@@ -197,27 +176,30 @@ export default function ActivityDetailsPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Hero Image */}
-          <div className="aspect-video rounded-lg overflow-hidden">
-            <img
-              src={activity.image || "/placeholder.svg"}
-              alt={activity.title}
-              className="w-full h-full object-cover"
+            <div className="aspect-video rounded-lg overflow-hidden relative">
+            <Image
+              src={activity.image || "/images/placeholder.svg"}
+              alt={activity.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 66vw"
+              priority
             />
-          </div>
+            </div>
 
           {/* Activity Info */}
           <div>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                  {activity.title}
+                  {activity.name}
                 </h1>
-                <Badge
+                {/* <Badge
                   variant="secondary"
                   className="mb-4 bg-sky-100 text-sky-800"
                 >
                   {activity.category}
-                </Badge>
+                </Badge> */}
               </div>
               <Button
                 variant="outline"
@@ -241,23 +223,6 @@ export default function ActivityDetailsPage() {
                 </p>
               </div>
 
-              {/* What Will You Get */}
-              {benefitsList.length > 0 && (
-                <div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
-                    What Will You Get?
-                  </h2>
-                  <ul className="space-y-2">
-                    {benefitsList.map((benefit, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
               {/* Rewards Section */}
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
@@ -272,7 +237,7 @@ export default function ActivityDetailsPage() {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">
-                          Earn {activity.points} Points
+                          Earn {activity.points_reward} Points
                         </p>
                         <p className="text-sm text-gray-600">
                           Points will be awarded upon event completion
@@ -281,7 +246,7 @@ export default function ActivityDetailsPage() {
                     </div>
 
                     {/* Badge */}
-                    {activity.badge && (
+                    {activity.badges && (
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                           <Award className="h-5 w-5 text-purple-600" />
@@ -289,21 +254,21 @@ export default function ActivityDetailsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <p className="font-semibold text-gray-900">
-                              Unlock "{activity.badge.name}" Badge
+                              Unlock "{activity.badges.name}" Badge
                             </p>
-                            <Badge
-                              className={`${getRarityColor(
-                                activity.badge.rarity
-                              )} text-xs cursor-default`}
-                            >
-                              {activity.badge.rarity}
-                            </Badge>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {activity.badge.description}
+                            {activity.badges.description}
                           </p>
                         </div>
-                        <div className="text-2xl">{activity.badge.icon}</div>
+                        <Image 
+                          alt={activity.badges.name} 
+                          src={activity.badges.image || "/public/images/placeholder.svg"} 
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 66vw"
+                          priority
+                        />
                       </div>
                     )}
                   </div>
@@ -311,8 +276,7 @@ export default function ActivityDetailsPage() {
               </div>
             </div>
 
-            {/* Organizer Info */}
-            <Card className="mt-6 border-sky-100">
+            {/* <Card className="mt-6 border-sky-100">
               <CardHeader>
                 <CardTitle className="text-lg text-sky-900">
                   Organized by
@@ -320,17 +284,13 @@ export default function ActivityDetailsPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
-                  {/* <Avatar>
-                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                    <AvatarFallback className="bg-sky-100 text-sky-700">{activity.organizer.charAt(0)}</AvatarFallback>
-                  </Avatar> */}
                   <div>
                     <p className="font-semibold">{activity.organizer}</p>
                     <p className="text-sm text-gray-600">Community Organizer</p>
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
 
@@ -348,9 +308,7 @@ export default function ActivityDetailsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                  Free
-                </div>
+
 
                 <Button
                   className={`w-full ${
@@ -448,17 +406,31 @@ export default function ActivityDetailsPage() {
                 <Calendar className="h-5 w-5 text-sky-600" />
                 <div>
                   <p className="font-medium">
-                    {new Date(activity.date).toLocaleDateString()}
+                    {new Date(activity.start_date).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
-                  <p className="text-sm text-gray-600">Date</p>
+                  <p className="text-sm text-gray-600">Start Date</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-sky-600" />
+                <Calendar className="h-5 w-5 text-sky-600" />
                 <div>
-                  <p className="font-medium">9:00 AM - 12:00 PM</p>
-                  <p className="text-sm text-gray-600">Duration</p>
+                  <p>
+                    {new Date(activity.end_date).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <p className="text-sm text-gray-600">End Date</p>
                 </div>
               </div>
 
@@ -474,20 +446,12 @@ export default function ActivityDetailsPage() {
                 <Users className="h-5 w-5 text-sky-600" />
                 <div>
                   <p className="font-medium">
-                    {activity.maxParticipants - activity.currentParticipants}{" "}
-                    spots available
+                    {activity.participant_count} Participant
                   </p>
-                  <p className="text-sm text-gray-600">Capacity</p>
+                  <p className="text-sm text-gray-600">Attended</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <DollarSign className="h-5 w-5 text-sky-600" />
-                <div>
-                  <p className="font-medium text-green-600">Free</p>
-                  <p className="text-sm text-gray-600">Price</p>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -504,7 +468,7 @@ export default function ActivityDetailsPage() {
                 <Star className="h-5 w-5 text-yellow-500" />
                 <div>
                   <p className="font-semibold text-gray-900">
-                    {activity.points} Points
+                    {activity.points_reward} Points
                   </p>
                   <p className="text-xs text-gray-600">
                     Awarded upon completion
@@ -512,28 +476,20 @@ export default function ActivityDetailsPage() {
                 </div>
               </div>
 
-              {activity.badge && (
+              {activity.badges && (
                 <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
-                  <div className="text-xl">{activity.badge.icon}</div>
+                  <div className="text-xl">{activity.badges.image}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">
-                      {activity.badge.name}
+                      {activity.badges.name}
                     </p>
-                    <Badge
-                      className={`${getRarityColor(
-                        activity.badge.rarity
-                      )} text-xs cursor-default mt-1`}
-                    >
-                      {activity.badge.rarity}
-                    </Badge>
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* What to Bring */}
-          <Card className="border-sky-200">
+          {/* <Card className="border-sky-200">
             <CardHeader>
               <CardTitle className="text-sky-900">What to Bring</CardTitle>
             </CardHeader>
@@ -557,7 +513,7 @@ export default function ActivityDetailsPage() {
                 </li>
               </ul>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
 
@@ -566,7 +522,7 @@ export default function ActivityDetailsPage() {
         isOpen={showJoinPopup}
         onClose={() => setShowJoinPopup(false)}
         status={registrationStatus}
-        activity={activity}
+        activity={{title:activity.name, joinPopup: {message: activity.popup_info.description, title: activity.popup_info.Title}}}
         onJoin={handleJoinConfirm}
       />
     </div>
