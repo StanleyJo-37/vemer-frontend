@@ -52,14 +52,14 @@ interface PaginatedResponse<T> {
 }
 
 interface CreateActivityPayload {
-  title: string,
-  image: File|null,
-  activity_description :string,
-  category :string,
-  start_date : string,
-  end_date: string,
-  location : string,
-  point_reward : number,
+  title: string;
+  image: File | null;
+  activity_description: string;
+  category: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  point_reward: number;
 }
 
 interface CreateRegisterPopupInfoPayload {
@@ -70,19 +70,21 @@ interface CreateRegisterPopupInfoPayload {
 interface CreateBadgePayload {
   activity_id: number;
   name: string;
-  icon: File|null;
+  icon: File | null;
   badge_description: string;
 }
 
-export type CreateActivityFull = Omit<CreateBadgePayload, "activity_id"> & CreateActivityPayload & CreateRegisterPopupInfoPayload & {
-  badge_exist: boolean,
-  popup_exist: boolean
-};
+export type CreateActivityFull = Omit<CreateBadgePayload, "activity_id"> &
+  CreateActivityPayload &
+  CreateRegisterPopupInfoPayload & {
+    badge_exist: boolean;
+    popup_exist: boolean;
+  };
 
 interface ApproveParticipantPayload {
   activity_id: number;
   user_id: number;
-  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
+  status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
 }
 
 interface SuccessResponse {
@@ -110,7 +112,7 @@ const PublisherDashboardAPI = {
       method: "GET",
     });
   },
-  getActivities: async (): Promise<{data: Activity[]}> => {
+  getActivities: async (): Promise<{ data: Activity[] }> => {
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/activities",
       method: "GET",
@@ -134,7 +136,7 @@ const PublisherDashboardAPI = {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
-        formData.append(key, value as string | Blob);
+      formData.append(key, value as string | Blob);
     });
 
     return API.AuthenticatedAPI.request({
@@ -150,7 +152,6 @@ const PublisherDashboardAPI = {
   createRegisterPopupInfo: async (
     payload: CreateRegisterPopupInfoPayload
   ): Promise<SuccessResponse> => {
-
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/create-register-popup-info",
       method: "POST",
@@ -166,8 +167,8 @@ const PublisherDashboardAPI = {
   ): Promise<SuccessResponse> => {
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
-      console.log("Val: ",value, "typeval", typeof value);
-        formData.append(key, value as string | Blob);
+      console.log("Val: ", value, "typeval", typeof value);
+      formData.append(key, value as string | Blob);
     });
 
     return API.AuthenticatedAPI.request({
@@ -180,10 +181,7 @@ const PublisherDashboardAPI = {
     });
   },
 
-  createActivityFull: async (
-    formData: FormData
-  ): Promise<SuccessResponse> => {
-
+  createActivityFull: async (formData: FormData): Promise<SuccessResponse> => {
     return API.AuthenticatedAPI.request({
       url: "/dashboard/publisher/create-activity-popup-badge",
       method: "POST",
@@ -223,7 +221,7 @@ const PublisherDashboardAPI = {
   getActivityParticipants: async (activity_id: number) => {
     return API.AuthenticatedAPI.request({
       url: `/dashboard/publisher/activity-participants/${activity_id}`,
-      method: "GET"
+      method: "GET",
     });
   },
 
@@ -236,20 +234,21 @@ const PublisherDashboardAPI = {
 
   getPublisherStats: async () => {
     return API.AuthenticatedAPI.request({
-      url: "/dashboard/publisher/stats",
-      method: "GET"
+      url: "/dashboard/publisher/stats ",
+      method: "GET",
     });
   },
 
-  isPublisher: async (request: NextRequest) => { // It MUST accept `request`
-    
+  isPublisher: async (request: NextRequest) => {
+    // It MUST accept `request`
+
     // 1. Extract cookies from the incoming browser request
-    const sessionToken = request.cookies.get('vemer_token')?.value;
-    const xsrfToken = request.cookies.get('XSRF-TOKEN')?.value;
+    const sessionToken = request.cookies.get("vemer_token")?.value;
+    const xsrfToken = request.cookies.get("XSRF-TOKEN")?.value;
 
     // This is a critical debugging step:
-    console.log('[isPublisher] Forwarding session token:', !!sessionToken); // Should be true
-    console.log('[isPublisher] Forwarding XSRF token:', !!xsrfToken);     // Should be true
+    console.log("[isPublisher] Forwarding session token:", !!sessionToken); // Should be true
+    console.log("[isPublisher] Forwarding XSRF token:", !!xsrfToken); // Should be true
 
     // If either token is missing, we can't authenticate
     if (!sessionToken || !xsrfToken) {
@@ -258,14 +257,17 @@ const PublisherDashboardAPI = {
 
     // 2. Manually build the headers for the outgoing request to Laravel
     const headers = {
-      'Cookie': `vemer_token=${sessionToken}; XSRF-TOKEN=${xsrfToken}`,
-      'X-XSRF-TOKEN': xsrfToken,
+      Cookie: `vemer_token=${sessionToken}; XSRF-TOKEN=${xsrfToken}`,
+      "X-XSRF-TOKEN": xsrfToken,
     };
 
-    console.log('[isPublisher] Sending request to Laravel with these headers:', headers);
+    console.log(
+      "[isPublisher] Sending request to Laravel with these headers:",
+      headers
+    );
 
     // 3. Make the API call with the constructed headers
-    return API.AuthenticatedAPI.get('/is-publisher', { headers });
+    return API.AuthenticatedAPI.get("/is-publisher", { headers });
   },
 };
 
