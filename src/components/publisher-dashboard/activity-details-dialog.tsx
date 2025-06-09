@@ -570,7 +570,7 @@ export function ActivityDetailsDialog({
                                   >
                                     <Flag className="h-4 w-4" />
                                   </Button>
-                                  <Button
+                                  {/* <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() =>
@@ -582,7 +582,7 @@ export function ActivityDetailsDialog({
                                     className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                   >
                                     <UserMinus className="h-4 w-4" />
-                                  </Button>
+                                  </Button> */}
                                 </>
                               )}
                             </div>

@@ -2,85 +2,157 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Calendar, Bell, BarChart3 } from "lucide-react"
+import { Plus, Calendar, Bell, Loader2, Shield } from "lucide-react"
 import { CreateActivityForm } from "@/components/publisher-dashboard/create-activity-form"
 import { MyActivities } from "@/components/publisher-dashboard/my-activities"
 import { ActivityNotifications } from "@/components/publisher-dashboard/activity-notifications"
 import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats"
-import { RecentActivityCards } from "@/components/publisher-dashboard/recent-activity-cards"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import API from "@/api/axios"
 
 const tabs = [
-  { id: "overview", label: "Overview", icon: BarChart3 },
   { id: "activities", label: "My Activities", icon: Calendar },
   { id: "create", label: "Create Activity", icon: Plus },
   { id: "notifications", label: "Notifications", icon: Bell },
 ]
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview")
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("activities")
   const [tabDimensions, setTabDimensions] = useState<{ [key: string]: { width: number; left: number } }>({})
   const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({})
-  
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  
+
+  const [isAuthorized, setIsAuthorized] = useState(false)
+
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const response = await API.AuthenticatedAPI.get('/is-publisher');
-        
+        const response = await API.AuthenticatedAPI.get("/is-publisher")
+
         if (response.data.is_publisher) {
-          setIsAuthorized(true);
+          setIsAuthorized(true)
         } else {
-          router.replace('/user-dashboard');
+          router.replace("/user-dashboard")
         }
       } catch (error) {
-        console.error("Authorization check failed:", error);
-        router.replace('/auth/login');
+        console.error("Authorization check failed:", error)
+        router.replace("/auth/login")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    checkStatus();
-  }, [router]);
+    }
+    checkStatus()
+  }, [router])
 
   // HOOK 2: Calculates tab dimensions after the user is authorized.
   useEffect(() => {
     // The logic is now INSIDE the hook, but the hook itself is always called.
     if (isAuthorized) {
-        const dimensions: { [key: string]: { width: number; left: number } } = {}
-        let cumulativeLeft = 4 
+      const dimensions: { [key: string]: { width: number; left: number } } = {}
+      let cumulativeLeft = 4
 
-        tabs.forEach((tab) => {
-          const tabElement = tabRefs.current[tab.id]
-          if (tabElement) {
-            const width = tabElement.offsetWidth
-            dimensions[tab.id] = {
-              width: width - 8,
-              left: cumulativeLeft,
-            }
-            cumulativeLeft += width
+      tabs.forEach((tab) => {
+        const tabElement = tabRefs.current[tab.id]
+        if (tabElement) {
+          const width = tabElement.offsetWidth
+          dimensions[tab.id] = {
+            width: width - 8,
+            left: cumulativeLeft,
           }
-        })
-        setTabDimensions(dimensions)
+          cumulativeLeft += width
+        }
+      })
+      setTabDimensions(dimensions)
     }
-  }, [isAuthorized]); // Reruns when authorization status changes
+  }, [isAuthorized]) // Reruns when authorization status changes
 
   // --- CONDITIONAL RETURNS (Now safe because they are AFTER all hooks) ---
 
   if (isLoading) {
-   return <div>Verifying access...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-indigo-100 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4"
+        >
+          <div className="text-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              className="inline-block"
+            >
+              <Loader2 className="h-12 w-12 text-sky-600 mb-4" />
+            </motion.div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Verifying Access</h2>
+            <p className="text-gray-600 mb-4">Please wait while we check your publisher credentials...</p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                className="bg-sky-600 h-2 rounded-full"
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
   }
 
   if (!isAuthorized) {
-    // While the router is redirecting, we can show a message or nothing.
-    return <div>Redirecting...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4"
+        >
+          <div className="text-center">
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+              className="inline-block"
+            >
+              <Shield className="h-12 w-12 text-orange-600 mb-4" />
+            </motion.div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Redirecting...</h2>
+            <p className="text-gray-600 mb-4">Taking you to the appropriate dashboard...</p>
+            <div className="flex justify-center">
+              <motion.div
+                className="flex space-x-1"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      repeatDelay: 1,
+                    },
+                  },
+                }}
+              >
+                {[0, 1, 2].map((index) => (
+                  <motion.div
+                    key={index}
+                    className="w-2 h-2 bg-orange-600 rounded-full"
+                    variants={{
+                      hidden: { opacity: 0.3, scale: 0.8 },
+                      visible: { opacity: 1, scale: 1 },
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
   }
-
 
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -127,7 +199,9 @@ export default function DashboardPage() {
             return (
               <button
                 key={tab.id}
-                ref={(el) => { tabRefs.current[tab.id] = el; }}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el
+                }}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 whitespace-nowrap",
@@ -152,14 +226,12 @@ export default function DashboardPage() {
           exit="exit"
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          {activeTab === "overview" && (
-            <div className="space-y-6">
+          {activeTab === "activities" && (
+            <>
               <DashboardStats />
-              <RecentActivityCards />
-            </div>
+              <MyActivities />
+            </>
           )}
-
-          {activeTab === "activities" && <MyActivities />}
           {activeTab === "create" && <CreateActivityForm />}
           {activeTab === "notifications" && <ActivityNotifications />}
         </motion.div>

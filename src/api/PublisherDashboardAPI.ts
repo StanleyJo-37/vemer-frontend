@@ -236,6 +236,13 @@ const PublisherDashboardAPI = {
     });
   },
 
+  getPublisherStats: async () => {
+    return API.AuthenticatedAPI.request({
+      url: "/dashboard/publisher/stats",
+      method: "GET"
+    });
+  },
+
   isPublisher: async (request: NextRequest) => { // It MUST accept `request`
     
     // 1. Extract cookies from the incoming browser request

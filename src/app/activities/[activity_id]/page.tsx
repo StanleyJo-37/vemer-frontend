@@ -98,7 +98,7 @@ export default function ActivityDetailsPage() {
       try {
         const response = await API.AuthenticatedAPI.get("/is-publisher");
 
-        if (response.data.is_publisher) {
+        if (response.data.is_publisher === true) {
           setIsPublisher(true);
         }
       } catch (error) {

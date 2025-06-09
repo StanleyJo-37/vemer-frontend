@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, MapPin, Mail, Phone } from "lucide-react";
+import { Handshake, MapPin, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
@@ -8,11 +8,11 @@ export default function Footer() {
     return (
         <footer className="bg-gray-900 text-white pt-16 pb-8">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Compass className="h-6 w-6 text-sky-400" />
-                <span className="text-xl font-bold">ActivityHub</span>
+                <Handshake className="h-6 w-6 text-sky-400" />
+                <span className="text-xl font-bold">Vemer</span>
               </div>
               <p className="text-gray-400 mb-4">
                 Connecting people with meaningful activities that develop skills and create positive impact.
@@ -34,17 +34,34 @@ export default function Footer() {
             <div>
               <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                {["Home", "Activities", "Dashboard"].map((link) => (
+                {["Home", "Activities", "Dashboard", "Leaderboard"].map((link) => (
                   <li key={link}>
-                    <Link href="#" className="text-gray-400 hover:text-sky-400 transition-colors duration-300">
-                      {link}
-                    </Link>
+                    {link == "About" && 
+                      <Link href="#" className="text-gray-400 hover:text-sky-400 transition-colors duration-300">
+                        {link}
+                      </Link>
+                    }
+                    {link == "Activities" &&
+                      <Link href="/activities" className="text-gray-400 hover:text-sky-400 transition-colors duration-300">
+                        {link}
+                      </Link>
+                    }
+                    {link == "Dashboard" &&
+                      <Link href="/user-dashboard" className="text-gray-400 hover:text-sky-400 transition-colors duration-300">
+                        {link}
+                      </Link>
+                    }
+                    {link == "Leaderboard" &&
+                      <Link href="/leaderboard" className="text-gray-400 hover:text-sky-400 transition-colors duration-300">
+                        {link}
+                      </Link>
+                    }
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div>
+            {/* <div>
               <h3 className="font-semibold text-lg mb-4">Activity Types</h3>
               <ul className="space-y-2">
                 {[
@@ -62,25 +79,25 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
             <div>
               <h3 className="font-semibold text-lg mb-4">Contact Us</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <MapPin className="h-5 w-5 text-sky-400 mr-2 mt-0.5" />
-                  <span className="text-gray-400">123 Community Ave, City, Country</span>
+                  <MapPin className="h-5 w-5 text-sky-400 mr-2" />
+                  <span className="text-gray-400">Jl. Jalur Sutera Bar. No.Kav. 21, RT.001/RW.004, Panunggangan, Kec. Pinang, Kota Tangerang, Banten 15143</span>
                 </li>
                 <li className="flex items-center">
                   <Mail className="h-5 w-5 text-sky-400 mr-2" />
-                  <Link href="mailto:info@activityhub.com" className="text-gray-400 hover:text-sky-400">
-                    info@activityhub.com
+                  <Link href="mailto:vemer@gmail.com" className="text-gray-400 hover:text-sky-400">
+                    vemer@gmail.com
                   </Link>
                 </li>
                 <li className="flex items-center">
                   <Phone className="h-5 w-5 text-sky-400 mr-2" />
-                  <Link href="tel:+1234567890" className="text-gray-400 hover:text-sky-400">
-                    (123) 456-7890
+                  <Link href="tel:+628123456789" className="text-gray-400 hover:text-sky-400">
+                    (62) 8123456789
                   </Link>
                 </li>
               </ul>
@@ -94,7 +111,7 @@ export default function Footer() {
 
           <div className="border-t border-gray-800 pt-8 mt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-500 text-sm">© {new Date().getFullYear()} ActivityHub. All rights reserved.</p>
+              <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Vemer. All rights reserved.</p>
               <div className="flex gap-6 mt-4 md:mt-0">
                 <Link href="#" className="text-gray-500 hover:text-sky-400 text-sm">
                   Privacy Policy

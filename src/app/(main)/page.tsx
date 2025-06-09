@@ -324,12 +324,12 @@ export default function Page() {
                 {
                   question: "How does the points system work?",
                   answer:
-                    "You earn points by participating in activities on our platform. Different activities award different point values based on their duration, impact, and complexity. Workshop attendance typically earns 30-50 points, while volunteer activities can earn 50-100 points depending on the hours contributed. These points help you level up your profile and unlock new rewards and opportunities.",
+                    "You earn points by participating in activities on our platform. Different activities award different point values based on their duration, impact, and complexity. These points help you level up your profile and unlock new rewards and opportunities.",
                 },
                 {
                   question: "Can I organize my own activity or event?",
                   answer:
-                    "Once you reach Level 3 on our platform, you can propose and organize your own activities. We provide tools to help you manage registrations, communicate with participants, and track impact. Your organized events will also earn you bonus points as an organizer.",
+                    "Yes, just register as a Publisher! We provide tools to help you manage registrations, communicate with participants, and track impact.",
                 },
                 {
                   question: "What types of rewards can I redeem with my points?",

@@ -1,14 +1,19 @@
 "use client"
 
+import PublisherDashboardAPI from "@/api/PublisherDashboardAPI";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, Users, MessageSquare, TrendingUp } from "lucide-react"
+import { useEffect, useState } from "react";
 
 export function DashboardStats() {
+  const [totalParticipants, setTotalParticipants] = useState(0);
+  const [totalActivities, setTotalActivities] = useState(0);
+  const [totalMessages, setTotalMessages] = useState(0);
+
   const stats = [
     {
       title: "Total Activities",
-      value: "12",
-      change: "+2 this month",
+      value: totalActivities,
       icon: Calendar,
       color: "text-sky-600",
       bgColor: "bg-sky-50",
@@ -16,8 +21,7 @@ export function DashboardStats() {
     },
     {
       title: "Total Participants",
-      value: "248",
-      change: "+18 this week",
+      value: totalParticipants,
       icon: Users,
       color: "text-green-600",
       bgColor: "bg-green-50",
@@ -25,14 +29,24 @@ export function DashboardStats() {
     },
     {
       title: "Messages Sent",
-      value: "34",
-      change: "+5 today",
+      value: totalMessages,
       icon: MessageSquare,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       borderColor: "border-purple-100",
     },
   ]
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const response = await PublisherDashboardAPI.getPublisherStats();
+      setTotalActivities(response.data.total_activities);
+      setTotalMessages(response.data.total_notifications);
+      setTotalParticipants(response.data.total_participants);
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
@@ -46,7 +60,6 @@ export function DashboardStats() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">{stat.change}</p>
           </CardContent>
         </Card>
       ))}
