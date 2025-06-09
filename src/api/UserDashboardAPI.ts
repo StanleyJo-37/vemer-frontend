@@ -60,11 +60,13 @@ const UserDashboardAPI = {
             method: 'GET',
         });
     },
-    setFavouriteBadges: async (data: any) => {
+    setFavouriteBadges: async (badge_id: number) => {
         return API.AuthenticatedAPI.request({
             url: baseUrl+'/set-favourite-badges',
             method: 'POST',
-            data,
+            data:{
+              badge_id:badge_id
+            },
         });
     },
       totalActivities: async (category: string): Promise<UserFormat[]> => {
@@ -135,6 +137,9 @@ const UserDashboardAPI = {
       },
     });
   },
+
+
+
 };
 
 export default UserDashboardAPI;

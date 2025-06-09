@@ -24,6 +24,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { cn } from "@/lib/utils"
+import { tree } from "next/dist/build/templates/app-page"
 
 const allBadges: BadgeType[] = [
   {
@@ -125,7 +126,7 @@ export default function BadgesPage() {
     try {
       const resp = await UserDashboardAPI.getUserBadges({ page: badgesPage, per_page:16 });
       (resp.data.data as BadgeType[]).forEach((badge)=>badge.favourite ? setFavcount((val)=>val+1) : null );
-      setBadges(allBadges);
+      setBadges(resp.data.data);
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
@@ -141,29 +142,29 @@ export default function BadgesPage() {
 
 
   const toggleFavorite = (badgeId: number, e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    if(favcount )
-    setBadges(badges.map((badge) => (
-      badge.id === badgeId ? ( favcount <= 4 ? { ...badge, favourite: !badge.favourite } : badge ) : badge
-    )))
-  }
-
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case "Common":
-        return "bg-gray-100 text-gray-800 border-gray-200"
-      case "Uncommon":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "Rare":
-        return "bg-blue-100 text-blue-800 border-blue-200"
-      case "Epic":
-        return "bg-purple-100 text-purple-800 border-purple-200"
-      case "Legendary":
-        return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-300"
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
-    }
+    e.stopPropagation();
+    setBadges((prevBadges) => {
+      const currentFavCount = prevBadges.filter((b) => b.favourite).length;
+      return prevBadges.map((badge) => {
+        if (badge.id !== badgeId) return badge;
+        if (badge.favourite) {
+          setIsLoading(true);
+          setFavcount((val) => Math.max(0, val - 1));
+          UserDashboardAPI.setFavouriteBadges(badge.id);
+          setIsLoading(false);
+          return { ...badge, favourite: false };
+        } else {
+          if (currentFavCount < 4) {
+            setIsLoading(true);
+            setFavcount((val) => val + 1);
+            UserDashboardAPI.setFavouriteBadges(badge.id);
+            setIsLoading(false);
+            return { ...badge, favourite: true };
+          }
+          return badge;
+        }
+      });
+    });
   }
 
   const filteredBadges = badges.filter((badge) => {
@@ -213,24 +214,7 @@ export default function BadgesPage() {
           </div>
         </div>
 
-        {/* Progress Summary
-      <Card className="border-sky-100 mb-6">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-gray-600">Collection Progress</span>
-            <span className="font-semibold text-sky-600">
-              {earnedBadges.length}/{badges.length}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-gradient-to-r from-sky-500 to-blue-600 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${(earnedBadges.length / badges.length) * 100}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-2">{badges.length - earnedBadges.length} more badges to unlock</p>
-        </CardContent>
-      </Card> */}
+        <p className="text-gray-300 mb-4 text-sm">Choose 4 badges to show your favourites</p>
 
         {/* Badges Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -258,7 +242,7 @@ export default function BadgesPage() {
               <CardContent className="p-4 sm:p-6 text-center">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3">
                   <Image
-                    src={badge.image_url}
+                    src={badge.image_url || "/placeholder-badge.png"}
                     alt={badge.badge_name}
                     layout="fill"
                     objectFit="contain"
@@ -302,36 +286,11 @@ export default function BadgesPage() {
             </Button>
           </div>
         )}
-        {/* {filteredBadges.length > 0 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious className={cn(
-                "",
-                (badgesPage===1) && "disable"
-              )} onClick={() => setBadgesPage((prev) => Math.max(1, prev - 1))} />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">{badgesPage}</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext className={cn(
-                "",
-                (badges.length < 16) && "disable"
-              )} onClick={() => setBadgesPage((prev) => prev + 1)} />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-        )} */}
-
         {filteredBadges.length === 0 && (
           <div className="text-center py-12">
             <Award className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No badges found</h3>
             <p className="text-gray-600 mb-6">Try adjusting your filter to see more badges.</p>
-            <Button onClick={() => setFilter("all")} variant="outline">
-              Show All Badges
-            </Button>
           </div>
         )}
       </div>
