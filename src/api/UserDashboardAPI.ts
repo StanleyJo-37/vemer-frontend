@@ -124,12 +124,14 @@ const UserDashboardAPI = {
     });
   },
 
-  getUserBadges: async ({ limit }: { limit?: number }) => {
+  getUserBadges: async ({ limit, page, per_page }: { limit?: number, page?:number, per_page?:number }) => {
     return API.AuthenticatedAPI.request({
       url: "/dashboard/user/badges",
       method: "GET",
       params: {
         limit,
+        page,
+        per_page
       },
     });
   },

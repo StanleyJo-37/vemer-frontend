@@ -12,10 +12,9 @@ import { useToast } from "@/hooks/useToast";
 import { AxiosError } from "axios";
 import UserDashboardAPI from "@/api/UserDashboardAPI";
 import LoadingSpinner from "../loading-spinner";
+import { Loader2 } from "lucide-react";
 
-export function UserBadges() {
-  const router = useRouter();
-  const [userBadges, setUserBadges] = useState([
+const dummyBadge = [
     {
       id: "badge1",
       name: "Green Warrior",
@@ -70,7 +69,11 @@ export function UserBadges() {
       earnedAt: "2025-06-12T16:45:00Z",
       isFavorite: false,
     },
-  ]);
+  ]
+
+export function UserBadges() {
+  const router = useRouter();
+  const [userBadges, setUserBadges] = useState<any[]>(dummyBadge);
 
   const handleViewAllBadges = () => {
     router.push("/user-dashboard/badges");
@@ -94,9 +97,8 @@ export function UserBadges() {
   const getUserBadges = async () => {
     setIsLoading(true);
     try {
-      const resp = await UserDashboardAPI.getUserBadges({ limit: 3 });
-
-      setUserBadges(resp.data);
+      const resp = await UserDashboardAPI.getUserBadges({ limit: 4 });
+      setUserBadges(resp.data.data);
     } catch (err) {
       if (err instanceof AxiosError) {
         toast(err.response?.data.message || err.message);
@@ -136,10 +138,10 @@ export function UserBadges() {
           <p>Please Wait...</p>
           <LoadingSpinner />
         </CardContent>
-      ) : (
+      ) : (userBadges.length > 0 ?(
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {...userBadges.map((badge) => (
+            {userBadges.map((badge) => (
               <div
                 key={badge.id}
                 className="relative p-3 sm:p-4 border-2 rounded-lg transition-all duration-200 hover:shadow-md border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50"
@@ -180,9 +182,9 @@ export function UserBadges() {
               </div>
             ))}
           </div>
-
-          {userBadges.length === 0 && (
-            <div className="text-center py-6 sm:py-8">
+        </CardContent>
+      ) : 
+      ( <div className="text-center py-6 sm:py-8">
               <Award className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 No badges unlocked yet.
@@ -191,9 +193,7 @@ export function UserBadges() {
                 You&rsquo;ll see your badges once you finish missions.
               </p>
             </div>
-          )}
-        </CardContent>
-      )}
-    </Card>
-  );
+      )
+  )}
+  </Card>);
 }
