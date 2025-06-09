@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import verifyAuth from "@/lib/verify-auth";
 import { UserType } from "@/types/UserType";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 export default function AuthProvider({
@@ -19,6 +20,7 @@ export default function AuthProvider({
   const [user, setUser] = useState<UserType | undefined>(undefined);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
   const [isAuth, setIsAuth] = useState<boolean>(authenticated);
+  const router = useRouter();
 
   useEffect(() => {
     setIsAuthLoading(true);
@@ -51,6 +53,7 @@ export default function AuthProvider({
   const logout = async () => {
     setIsLoadingLogout(true);
     try {
+      router.push("/auth/login");
       const resp = AuthAPI.logout();
 
       localStorage.removeItem("user");

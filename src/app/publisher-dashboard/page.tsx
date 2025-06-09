@@ -9,6 +9,8 @@ import { ActivityNotifications } from "@/components/publisher-dashboard/activity
 import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats"
 import { RecentActivityCards } from "@/components/publisher-dashboard/recent-activity-cards"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
+import API from "@/api/axios"
 
 const tabs = [
   { id: "overview", label: "Overview", icon: BarChart3 },
@@ -18,35 +20,73 @@ const tabs = [
 ]
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview")
   const [tabDimensions, setTabDimensions] = useState<{ [key: string]: { width: number; left: number } }>({})
   const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({})
+  
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await API.AuthenticatedAPI.get('/is-publisher');
+        
+        if (response.data.is_publisher) {
+          setIsAuthorized(true);
+        } else {
+          router.replace('/user-dashboard');
+        }
+      } catch (error) {
+        console.error("Authorization check failed:", error);
+        router.replace('/auth/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkStatus();
+  }, [router]);
+
+  // HOOK 2: Calculates tab dimensions after the user is authorized.
+  useEffect(() => {
+    // The logic is now INSIDE the hook, but the hook itself is always called.
+    if (isAuthorized) {
+        const dimensions: { [key: string]: { width: number; left: number } } = {}
+        let cumulativeLeft = 4 
+
+        tabs.forEach((tab) => {
+          const tabElement = tabRefs.current[tab.id]
+          if (tabElement) {
+            const width = tabElement.offsetWidth
+            dimensions[tab.id] = {
+              width: width - 8,
+              left: cumulativeLeft,
+            }
+            cumulativeLeft += width
+          }
+        })
+        setTabDimensions(dimensions)
+    }
+  }, [isAuthorized]); // Reruns when authorization status changes
+
+  // --- CONDITIONAL RETURNS (Now safe because they are AFTER all hooks) ---
+
+  if (isLoading) {
+   return <div>Verifying access...</div>;
+  }
+
+  if (!isAuthorized) {
+    // While the router is redirecting, we can show a message or nothing.
+    return <div>Redirecting...</div>;
+  }
+
 
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
   }
-
-  useEffect(() => {
-    // Calculate dimensions for each tab
-    const dimensions: { [key: string]: { width: number; left: number } } = {}
-    let cumulativeLeft = 4 // Starting position accounting for container padding
-
-    tabs.forEach((tab) => {
-      const tabElement = tabRefs.current[tab.id]
-      if (tabElement) {
-        const width = tabElement.offsetWidth
-        dimensions[tab.id] = {
-          width: width - 8, // Subtract padding to fit within the tab
-          left: cumulativeLeft,
-        }
-        cumulativeLeft += width
-      }
-    })
-
-    setTabDimensions(dimensions)
-  }, [])
 
   const activeTabDimensions = tabDimensions[activeTab]
 

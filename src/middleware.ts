@@ -1,40 +1,36 @@
+// src/middleware.ts (The New, Simpler Version)
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import PublisherDashboardAPI from "./api/PublisherDashboardAPI";
 
-// Define your protected routes
-const protectedRoutes = ["/user-dashboard"]; // Add any other routes that need authentication
-const publisherRoutes = ["/publisher-dashboard"];
+// Combine all routes that require a user to be logged in.
+const allProtectedRoutes = ["/user-dashboard", "/publisher-dashboard"];
+const authRoutes = ["/auth/login", "/auth/register"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const authToken = request.cookies.get("vemer_token")?.value;
+  const sessionToken = request.cookies.get("vemer_token")?.value;
 
-  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-    if (!authToken) {
+  // 1. If user is trying to access ANY protected route
+  if (allProtectedRoutes.some((route) => pathname.startsWith(route))) {
+    // And they are NOT logged in, redirect them to login.
+    if (!sessionToken) {
       const loginUrl = new URL("/auth/login", request.url);
-      loginUrl.searchParams.set("redirectedFrom", pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
 
-  if (publisherRoutes.some((route) => pathname.startsWith(route))) {
-    const response = await PublisherDashboardAPI.isPublisher();
-
-    if (!response.data) {
-      const notfoundUrl = new URL("/404notfound", request.url);
-      notfoundUrl.searchParams.set("redirectedFrom", pathname);
-      return NextResponse.redirect(notfoundUrl);
-    }
+  // 2. If user IS logged in and tries to see the login page, redirect them.
+  if (sessionToken && authRoutes.some((route) => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL("/user-dashboard", request.url)); // Redirect to a generic default
   }
 
-  if (
-    authToken &&
-    (pathname.startsWith("/auth/login") ||
-      pathname.startsWith("/auth/register"))
-  ) {
-    return NextResponse.redirect(new URL("/publisher-dashboard", request.url)); // Or your main authenticated page
-  }
-
+  // If neither of the above, allow the request to proceed.
   return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }
