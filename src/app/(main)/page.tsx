@@ -16,14 +16,19 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import API from "@/api/axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const initializeSanctum = async () => {
   try {
     console.log("Initializing Sanctum handshake...");
-    await API.RegularAPI.get('/sanctum/csrf-cookie');
+    await API.RegularAPI.get("/sanctum/csrf-cookie");
     console.log("Sanctum handshake complete!");
   } catch (error) {
     console.error("Error during Sanctum handshake:", error);
@@ -33,8 +38,27 @@ const initializeSanctum = async () => {
 export default function Page() {
   const words = ["sharing", "serving", "contributing", "supporting"];
 
+  const [featuredActivities, setFeaturedActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     initializeSanctum();
+    // Fetch featured activities from backend (first 4)
+    const fetchActivities = async () => {
+      setLoading(true);
+      try {
+        const res = await API.PublicAPI.get("/activities", {
+          params: { per_page: 4, page: 1 },
+        });
+        // If paginated, use res.data.data; else use res.data
+        setFeaturedActivities(res.data.data || res.data);
+      } catch (err) {
+        setFeaturedActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchActivities();
   }, []);
 
   return (
@@ -54,8 +78,8 @@ export default function Page() {
           <Image
             src="/images/mainhero.avif"
             alt="Background image"
-            width={screen.width}
-            height={screen.height}
+            width={1920}
+            height={1080}
             className="w-full h-full object-cover"
           />
         </div>
@@ -133,9 +157,11 @@ export default function Page() {
             }}
             className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
-            <button className="w-60 bg-sky-600 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-              Explore Now
-            </button>
+            <Link href="/activities">
+              <button className="w-60 bg-sky-600 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                Explore Now
+              </button>
+            </Link>
             <button className="w-60 transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
               Contact Support
             </button>
@@ -156,38 +182,19 @@ export default function Page() {
             </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <ActivityCard
-              title="Summer Music Festival"
-              image="/placeholder.svg?height=400&width=600"
-              date="Aug 15-17, 2023"
-              location="Central Park, New York"
-              price="$89"
-              category="Music"
-            />
-            <ActivityCard
-              title="Tech Conference 2023"
-              image="/placeholder.svg?height=400&width=600"
-              date="Sep 5-7, 2023"
-              location="Convention Center, San Francisco"
-              price="$199"
-              category="Technology"
-            />
-            <ActivityCard
-              title="Food & Wine Expo"
-              image="/placeholder.svg?height=400&width=600"
-              date="Jul 22-23, 2023"
-              location="Grand Hall, Chicago"
-              price="$45"
-              category="Food"
-            />
-            <ActivityCard
-              title="Art Exhibition"
-              image="/placeholder.svg?height=400&width=600"
-              date="Aug 10-20, 2023"
-              location="Modern Gallery, Los Angeles"
-              price="$25"
-              category="Art"
-            />
+            {loading ? (
+              <div className="col-span-4 flex justify-center items-center h-32">
+                <span className="text-sky-600 font-semibold">Loading...</span>
+              </div>
+            ) : featuredActivities.length > 0 ? (
+              featuredActivities.map((activity) => (
+                <ActivityCard key={activity.id} activity={activity} />
+              ))
+            ) : (
+              <div className="col-span-4 text-center text-gray-500">
+                No featured activities found.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -311,8 +318,12 @@ export default function Page() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <Badge className="bg-sky-100 text-sky-700 hover:bg-sky-100 mb-4">Questions & Answers</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Frequently Asked Questions</h2>
+            <Badge className="bg-sky-100 text-sky-700 hover:bg-sky-100 mb-4">
+              Questions & Answers
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Frequently Asked Questions
+            </h2>
             <p className="mt-4 text-lg text-gray-600">
               Everything you need to know about our platform and how it works.
             </p>
@@ -332,28 +343,41 @@ export default function Page() {
                     "Yes, just register as a Publisher! We provide tools to help you manage registrations, communicate with participants, and track impact.",
                 },
                 {
-                  question: "What types of rewards can I redeem with my points?",
+                  question:
+                    "What types of rewards can I redeem with my points?",
                   answer:
                     "Our rewards marketplace includes a variety of options such as gift cards from partner businesses, exclusive merchandise, free tickets to premium workshops, and even opportunities to have coffee with industry leaders. We regularly update our rewards based on community feedback and new partnerships.",
                 },
                 {
-                  question: "How do I track my volunteer hours for school or work requirements?",
+                  question:
+                    "How do I track my volunteer hours for school or work requirements?",
                   answer:
                     "Our platform automatically tracks all your volunteer hours. You can generate official certificates and detailed reports of your volunteer activities from your profile dashboard. These documents include the organization name, activity description, date, hours contributed, and are verified by our system.",
                 },
               ].map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="border-b border-gray-200">
+                <AccordionItem
+                  key={index}
+                  value={`item-${index}`}
+                  className="border-b border-gray-200"
+                >
                   <AccordionTrigger className="text-left font-medium text-gray-900 py-4">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-gray-600 max-w-lg pb-4">{faq.answer}</AccordionContent>
+                  <AccordionContent className="text-gray-600 max-w-lg pb-4">
+                    {faq.answer}
+                  </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
 
             <div className="mt-8 text-center">
-              <p className="text-gray-600 mb-4">Still have questions? We're here to help!</p>
-              <Button variant="outline" className="border-sky-600 text-sky-600 hover:bg-sky-50">
+              <p className="text-gray-600 mb-4">
+                Still have questions? We're here to help!
+              </p>
+              <Button
+                variant="outline"
+                className="border-sky-600 text-sky-600 hover:bg-sky-50"
+              >
                 Contact Support
               </Button>
             </div>
