@@ -20,14 +20,9 @@ export default function UserDashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!isAuth) router.replace("/auth/login");
     if (user?.is_publisher) router.replace("/publisher-dashboard");
   }, []);
-
-  useEffect(() => {
-    if (!isAuth) {
-      router.replace("/auth/login");
-    }
-  }, [isAuth, router]);
 
   return (
     <div className="container mx-auto px-4 py-8">
