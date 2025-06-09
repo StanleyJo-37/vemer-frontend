@@ -47,6 +47,8 @@ export default function AuthProvider({
       } else {
         fetchUser();
       }
+    } else {
+      localStorage.removeItem("user");
     }
   }, [isAuth]);
 
@@ -72,7 +74,7 @@ export default function AuthProvider({
     setIsLoadingLogout(true);
     try {
       const resp = AuthAPI.logout();
-      
+
       localStorage.removeItem("user");
       router.push("/auth/login");
       setIsAuth(false);
