@@ -28,6 +28,7 @@ import {
 import { useRouter, useParams } from "next/navigation";
 import { RegistrationStatus } from "@/types/StatusTypes";
 import ActivityAPI from "@/api/ActivityAPI";
+import API from "@/api/axios";
 
 // Helper function to parse benefits into sentences
 const parseBenefits = (benefits: string): string[] => {
@@ -70,6 +71,7 @@ export default function ActivityDetailsPage() {
   const [activity, setActivity] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [canJoin, setCanJoin] = useState(false);
+  const [isPublisher, setIsPublisher] = useState(true);
   const [registrationStatus, setRegistrationStatus] =
     useState<RegistrationStatus>("Unregistered");
   const [showJoinPopup, setShowJoinPopup] = useState(false);
@@ -87,11 +89,24 @@ export default function ActivityDetailsPage() {
   }, [params?.activity_id]);
 
   useEffect(() => {
-    // Get the ID from the URL using useParams
-
     handleRender();
     setIsLoading(false);
   }, [params, handleRender]);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await API.AuthenticatedAPI.get("/is-publisher");
+
+        if (response.data.is_publisher) {
+          setIsPublisher(true);
+        }
+      } catch (error) {
+        console.error("Authorization check failed:", error);
+      }
+    };
+    checkStatus();
+  }, []);
 
   const handleJoinActivity = async (e: React.FormEvent) => {
     if (activity?.joinPopup) {
@@ -324,104 +339,106 @@ export default function ActivityDetailsPage() {
         {/* Sidebar */}
         <div className="space-y-4 sm:space-y-6">
           {/* Join Card */}
-          <Card className="border-sky-200">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl text-sky-900">
-                Join This Activity
-              </CardTitle>
-              <CardDescription>
-                Be part of making a positive impact in your community
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                Free
-              </div>
+          {!isPublisher && (
+            <Card className="border-sky-200">
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl text-sky-900">
+                  Join This Activity
+                </CardTitle>
+                <CardDescription>
+                  Be part of making a positive impact in your community
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">
+                  Free
+                </div>
 
-              <Button
-                className={`w-full ${
-                  (
-                    [
-                      "Pending",
-                      "Completed",
-                      "Confirmed",
-                    ] as RegistrationStatus[]
-                  ).includes(registrationStatus) || !canJoin
-                    ? "bg-sky-100 text-sky-700 border-sky-200"
-                    : registrationStatus ===
-                      ("Unregistered" as RegistrationStatus)
-                    ? "bg-sky-600 hover:bg-sky-700"
-                    : "bg-red-500 hover:bg-red-300"
-                }`}
-                onClick={handleJoinActivity}
-                variant={
-                  (
-                    [
-                      "Pending",
-                      "Completed",
-                      "Confirmed",
-                    ] as RegistrationStatus[]
-                  ).includes(registrationStatus)
-                    ? "outline"
-                    : "default"
-                }
-                disabled={
-                  (
-                    [
-                      "Pending",
-                      "Completed",
-                      "Confirmed",
-                    ] as RegistrationStatus[]
-                  ).includes(registrationStatus) || !canJoin
-                }
-              >
-                {canJoin
-                  ? (() => {
-                      switch (registrationStatus) {
-                        case "Pending":
-                          return (
-                            <>
-                              <Heart className="mr-2 h-4 w-4 fill-current" />
-                              Pending Approval
-                            </>
-                          );
-                        case "Completed":
-                          return (
-                            <>
-                              <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                              Completed
-                            </>
-                          );
-                        case "Confirmed":
-                          return (
-                            <>
-                              <Star className="mr-2 h-4 w-4 text-yellow-500" />
-                              Confirmed
-                            </>
-                          );
-                        case "Unregistered":
-                          return "Join Activity";
-                        case "Cancelled":
-                          return (
-                            <>
-                              <Heart className="mr-2 h-4 w-4 text-red-500" />
-                              Rejected
-                            </>
-                          );
-                        default:
-                          return "Join Activity";
-                      }
-                    })()
-                  : "Wait ..."}
-              </Button>
+                <Button
+                  className={`w-full ${
+                    (
+                      [
+                        "Pending",
+                        "Completed",
+                        "Confirmed",
+                      ] as RegistrationStatus[]
+                    ).includes(registrationStatus) || !canJoin
+                      ? "bg-sky-100 text-sky-700 border-sky-200"
+                      : registrationStatus ===
+                        ("Unregistered" as RegistrationStatus)
+                      ? "bg-sky-600 hover:bg-sky-700"
+                      : "bg-red-500 hover:bg-red-300"
+                  }`}
+                  onClick={handleJoinActivity}
+                  variant={
+                    (
+                      [
+                        "Pending",
+                        "Completed",
+                        "Confirmed",
+                      ] as RegistrationStatus[]
+                    ).includes(registrationStatus)
+                      ? "outline"
+                      : "default"
+                  }
+                  disabled={
+                    (
+                      [
+                        "Pending",
+                        "Completed",
+                        "Confirmed",
+                      ] as RegistrationStatus[]
+                    ).includes(registrationStatus) || !canJoin
+                  }
+                >
+                  {canJoin
+                    ? (() => {
+                        switch (registrationStatus) {
+                          case "Pending":
+                            return (
+                              <>
+                                <Heart className="mr-2 h-4 w-4 fill-current" />
+                                Pending Approval
+                              </>
+                            );
+                          case "Completed":
+                            return (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                                Completed
+                              </>
+                            );
+                          case "Confirmed":
+                            return (
+                              <>
+                                <Star className="mr-2 h-4 w-4 text-yellow-500" />
+                                Confirmed
+                              </>
+                            );
+                          case "Unregistered":
+                            return "Join Activity";
+                          case "Cancelled":
+                            return (
+                              <>
+                                <Heart className="mr-2 h-4 w-4 text-red-500" />
+                                Rejected
+                              </>
+                            );
+                          default:
+                            return "Join Activity";
+                        }
+                      })()
+                    : "Wait ..."}
+                </Button>
 
-              <div className="text-sm text-gray-600 text-center">
-                {registrationStatus != "Unregistered"
-                  ? "You're registered for this activity!"
-                  : "Click to register for this activity"}
-              </div>
-            </CardContent>
-          </Card>
+                <div className="text-sm text-gray-600 text-center">
+                  {registrationStatus != "Unregistered"
+                    ? "You're registered for this activity!"
+                    : "Click to register for this activity"}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Event Details */}
           <Card className="border-sky-200">
