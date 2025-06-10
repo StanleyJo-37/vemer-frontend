@@ -97,7 +97,9 @@ export default function ActivityDetailsPage() {
     const checkStatus = async () => {
       try {
         const response = await API.AuthenticatedAPI.get("/is-publisher");
-        console.log(typeof response.data.is_publisher + response.data.is_publisher)
+        console.log(
+          typeof response.data.is_publisher + response.data.is_publisher
+        );
         setIsPublisher(response.data.is_publisher);
       } catch (error) {
         console.error("Authorization check failed:", error);
@@ -199,7 +201,7 @@ export default function ActivityDetailsPage() {
           {/* Hero Image */}
           <div className="aspect-video rounded-lg overflow-hidden">
             <img
-              src={activity.image || "/placeholder.svg"}
+              src={activity?.thumbnail?.path}
               alt={activity.title}
               className="w-full h-full object-cover"
             />
@@ -473,11 +475,8 @@ export default function ActivityDetailsPage() {
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-sky-600" />
                 <div>
-                  <p className="font-medium">
-                    {activity.maxParticipants - activity.currentParticipants}{" "}
-                    spots available
-                  </p>
-                  <p className="text-sm text-gray-600">Capacity</p>
+                  <p className="font-medium">{activity.participant_count}</p>
+                  <p className="text-sm text-gray-600">Participants</p>
                 </div>
               </div>
 

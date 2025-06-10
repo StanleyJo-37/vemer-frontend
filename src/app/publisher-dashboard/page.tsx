@@ -10,6 +10,8 @@ import { DashboardStats } from "@/components/publisher-dashboard/dashboard-stats
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
+import usePublisherDashboard from "@/hooks/usePublisherDashboard";
+import { PublisherDashboardTabsType } from "@/types/DashboardType";
 
 const tabs = [
   { id: "activities", label: "My Activities", icon: Calendar },
@@ -20,7 +22,7 @@ const tabs = [
 export default function DashboardPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("activities");
+  const { activeTab, setActiveTab } = usePublisherDashboard();
   const [tabDimensions, setTabDimensions] = useState<{
     [key: string]: { width: number; left: number };
   }>({});
@@ -85,7 +87,7 @@ export default function DashboardPage() {
                 ref={(el) => {
                   tabRefs.current[tab.id] = el;
                 }}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => setActiveTab(tab.id as PublisherDashboardTabsType)}
                 className={cn(
                   "relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 whitespace-nowrap",
                   activeTab === tab.id
