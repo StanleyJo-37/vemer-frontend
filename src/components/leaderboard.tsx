@@ -32,89 +32,13 @@ import LeaderboardAPI from "@/api/LeaderboardAPI";
 
 export interface UserFormat {
   id: number;
-  name: string;
+  username: string;
   avatar: string;
-  points: number;
+  total_points: number;
   eventsAttended: number;
   rank: number;
   level: "Bronze" | "Silver" | "Gold" | "Alpha" | "Sigma";
 }
-
-// Mock leaderboard data
-const mockLeaderboardData: UserFormat[] = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2850,
-    eventsAttended: 28,
-    rank: 1,
-    level: "Gold",
-  },
-  {
-    id: 2,
-    name: "Mike Chen",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2720,
-    eventsAttended: 25,
-    rank: 2,
-    level: "Gold",
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2650,
-    eventsAttended: 24,
-    rank: 3,
-    level: "Gold",
-  },
-  {
-    id: 4,
-    name: "David Wilson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2480,
-    eventsAttended: 22,
-    rank: 4,
-    level: "Silver",
-  },
-  {
-    id: 5,
-    name: "Lisa Brown",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2350,
-    eventsAttended: 21,
-    rank: 5,
-    level: "Silver",
-  },
-  {
-    id: 6,
-    name: "John Smith",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 2180,
-    eventsAttended: 19,
-    rank: 6,
-    level: "Silver",
-  },
-  {
-    id: 7,
-    name: "Alex Rodriguez",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 1950,
-    eventsAttended: 17,
-    rank: 7,
-    level: "Bronze",
-  },
-  {
-    id: 8,
-    name: "Maria Garcia",
-    avatar: "/placeholder.svg?height=40&width=40",
-    points: 1820,
-    eventsAttended: 16,
-    rank: 8,
-    level: "Bronze",
-  },
-];
 
 export function UserLeaderboard() {
   const [timeFilter, setTimeFilter] = useState<string>("all-time");
@@ -125,13 +49,14 @@ export function UserLeaderboard() {
   const [totalEventsCompleted, setTotalEventsCompleted] = useState<number>(0);
 
   const [leaderboard, setLeaderboard] =
-    useState<UserFormat[]>(mockLeaderboardData);
+    useState<UserFormat[]>([]);
 
   const loadLeaderboard = useCallback(async () => {
 
     try {
-      const data = await LeaderboardAPI.getLeaderboard(categoryFilter);
-      setLeaderboard(data);
+      const data = await LeaderboardAPI.getLeaderboard({ category: categoryFilter });
+      setLeaderboard(data.data);
+      console.log(data.data);
     } catch (e) {
       console.error("Failed to load leaderboard:", e);
     }
@@ -144,19 +69,19 @@ export function UserLeaderboard() {
       console.error("Failed to load total active user:", e);
     }
 
-    // try {
-    //   const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
-    //   setTotalPointsEarned(point);
-    // } catch (e) {
-    //   console.error("Failed to load total points earned:", e);
-    // }
+    try {
+      const point = await LeaderboardAPI.getTotalPointsEarned(categoryFilter);
+      setTotalPointsEarned(point.data);
+    } catch (e) {
+      console.error("Failed to load total points earned:", e);
+    }
 
-    // try {
-    //   const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
-    //   setTotalEventsCompleted(event);
-    // } catch (e) {
-    //   console.error("Failed to load total events completed:", e);
-    // }
+    try {
+      const event = await LeaderboardAPI.getTotalEventsCompleted(categoryFilter);
+      setTotalEventsCompleted(event.data);
+    } catch (e) {
+      console.error("Failed to load total events completed:", e);
+    }
   }, [categoryFilter]);
 
 
@@ -218,7 +143,7 @@ export function UserLeaderboard() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters
       <div className="flex flex-col sm:flex-row gap-4">
         <Select value={timeFilter} onValueChange={setTimeFilter}>
           <SelectTrigger className="w-full sm:w-48 border-sky-200 focus:border-sky-400 focus:ring-sky-400">
@@ -243,7 +168,7 @@ export function UserLeaderboard() {
             <SelectItem value="arts">Arts & Culture</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       {/* Top 3 Podium */}
       <Card className="border-sky-100 overflow-hidden">
@@ -279,11 +204,11 @@ export function UserLeaderboard() {
                   <Avatar className="h-16 w-16 mx-auto mb-3 border-4 border-white shadow-lg">
                     <AvatarImage src={user.avatar || "/placeholder.svg"} />
                     <AvatarFallback className="text-lg font-bold">
-                      {user.name.charAt(0)}
+                      {user.username.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
 
-                  <h3 className="font-bold text-gray-900 mb-1">{user.name}</h3>
+                  <h3 className="font-bold text-gray-900 mb-1">{user.username}</h3>
                   <Badge className={`${getLevelColor(user.level)} mb-2`}>
                     {user.level}
                   </Badge>
@@ -292,7 +217,7 @@ export function UserLeaderboard() {
                     <div className="flex items-center justify-center gap-1">
                       <Star className="h-4 w-4 text-yellow-500" />
                       <span className="font-semibold">
-                        {user.points.toLocaleString()} points
+                        {user.total_points} points
                       </span>
                     </div>
                     <div className="flex items-center justify-center gap-1">
@@ -320,7 +245,7 @@ export function UserLeaderboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {mockLeaderboardData.map((user, index) => (
+            {leaderboard.map((user, index) => (
               <motion.div
                 key={user.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -349,13 +274,13 @@ export function UserLeaderboard() {
                     <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
                       <AvatarImage src={user.avatar || "/placeholder.svg"} />
                       <AvatarFallback className="font-bold">
-                        {user.name.charAt(0)}
+                        {user.username.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-gray-900 truncate">
-                          {user.name}
+                          {user.username}
                         </h3>
                         <Badge
                           className={`${getLevelColor(user.level)} text-xs`}
@@ -377,7 +302,7 @@ export function UserLeaderboard() {
                 <div className="text-right">
                   <div className="flex items-center gap-1 text-lg font-bold text-sky-600">
                     <Star className="h-4 w-4 text-yellow-500" />
-                    {user.points.toLocaleString()}
+                    {user.total_points.toLocaleString()}
                   </div>
                   <p className="text-xs text-gray-500">points</p>
                 </div>
