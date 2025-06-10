@@ -59,7 +59,7 @@ const schema = z
       .number()
       .min(0, { message: "Points must not be negative." })
       .max(500, { message: "Points must not exceed 500 points." }),
-    image: z
+    thumbnail: z
       .instanceof(File)
       .refine(
         (file) =>
@@ -73,6 +73,7 @@ const schema = z
       .refine((file) => file.size <= 50 * 1024 * 1024, {
         message: "Max file size is 50MB",
       }),
+    status: z.boolean(),
     popup_exist: z.boolean().optional(),
     registerPopupTitle: z.string().optional(),
     registerPopupMessage: z.string().optional(),
@@ -94,7 +95,8 @@ const schema = z
       )
       .refine((file) => !file || file.size <= 50 * 1024 * 1024, {
         message: "Max file size is 50MB",
-      }),
+      })
+      .optional(),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: "End date must be greater than or equal to the start date.",
@@ -112,7 +114,8 @@ export function CreateActivityForm() {
       startDate: "",
       endDate: "",
       points: 0,
-      image: undefined,
+      thumbnail: undefined,
+      status: true,
       popup_exist: false,
       registerPopupTitle: "",
       registerPopupMessage: "",
@@ -138,9 +141,11 @@ export function CreateActivityForm() {
         }
       });
 
-      //   const resp = await PublisherDashboardAPI.createActivityFull(formData);
-      //   toast({ title: "Success", description: "Activity created successfully!" });
-      console.log("Form Data:", data); // For debugging
+      const resp = await PublisherDashboardAPI.createActivityFull(formData);
+      toast({
+        title: "Success",
+        description: "Activity created successfully!",
+      });
     } catch (err) {
       const errorMessage =
         err instanceof AxiosError
@@ -192,12 +197,12 @@ export function CreateActivityForm() {
                 Upload Photo of the event
               </h2>
               <Controller
-                name="image"
+                name="thumbnail"
                 control={form.control}
                 render={({ field: { onChange, value, ...rest } }) => (
                   <div>
                     <Input
-                      id="image"
+                      id="thumbnail"
                       type="file"
                       accept="image/*"
                       onChange={(e) =>
@@ -209,7 +214,6 @@ export function CreateActivityForm() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => document.getElementById("image")?.click()}
                       className="w-full border-dashed border-2 border-gray-300 hover:border-sky-500 h-12"
                     >
                       <Upload className="h-5 w-5 mr-2" />
@@ -495,9 +499,9 @@ export function CreateActivityForm() {
                   Thumbnail
                 </h3>
                 <div className="aspect-square bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                  {form.watch("image") ? (
+                  {form.watch("thumbnail") ? (
                     <img
-                      src={URL.createObjectURL(form.watch("image")!)}
+                      src={URL.createObjectURL(form.watch("thumbnail")!)}
                       alt="Thumbnail preview"
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -524,33 +528,35 @@ export function CreateActivityForm() {
                     name="category"
                     control={form.control}
                     render={({ field }) => (
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="border-gray-200 focus:border-sky-500 focus:ring-sky-500">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="environmental">
-                            Environmental
-                          </SelectItem>
-                          <SelectItem value="community">
-                            Community Service
-                          </SelectItem>
-                          <SelectItem value="education">Education</SelectItem>
-                          <SelectItem value="health">
-                            Health & Wellness
-                          </SelectItem>
-                          <SelectItem value="arts">Arts & Culture</SelectItem>
-                          <SelectItem value="sports">
-                            Sports & Recreation
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="border-gray-200 focus:border-sky-500 focus:ring-sky-500">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="environmental">
+                              Environmental
+                            </SelectItem>
+                            <SelectItem value="community">
+                              Community Service
+                            </SelectItem>
+                            <SelectItem value="education">Education</SelectItem>
+                            <SelectItem value="health">
+                              Health & Wellness
+                            </SelectItem>
+                            <SelectItem value="arts">Arts & Culture</SelectItem>
+                            <SelectItem value="sports">
+                              Sports & Recreation
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </div>
                     )}
                   />
-                  <FormMessage />
                 </div>
 
                 <div className="space-y-2">
@@ -641,31 +647,20 @@ export function CreateActivityForm() {
 
             <Card className="border-gray-200">
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
-                    <User className="h-5 w-5 text-sky-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      John Publisher
-                    </p>
-                    <p className="text-sm text-gray-600">Event Organizer</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-red-100 text-red-800 cursor-default">
-                    Add Category
-                  </Badge>
-                  <Badge className="bg-green-100 text-green-800 cursor-default">
-                    Approved ✓
-                  </Badge>
-                  <Badge className="bg-yellow-100 text-yellow-800 cursor-default">
-                    Technology ⚡
-                  </Badge>
-                  <Badge className="bg-purple-100 text-purple-800 cursor-default">
-                    Education 📚
-                  </Badge>
-                </div>
+                <Controller
+                  name="status"
+                  control={form.control}
+                  render={({ field }) => (
+                    <div className="flex flex-row items-center space-x-4">
+                      <Switch
+                        onCheckedChange={field.onChange}
+                        checked={field.value}
+                      />
+                      <FormLabel htmlFor="status">Publish activity?</FormLabel>
+                      <FormMessage />
+                    </div>
+                  )}
+                />
               </CardContent>
             </Card>
 
@@ -673,6 +668,9 @@ export function CreateActivityForm() {
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-lg font-semibold"
               disabled={isSubmitting}
+              onClick={() => {
+                console.log(form.formState.errors);
+              }}
             >
               {isSubmitting ? "Creating..." : "Create"}
             </Button>
